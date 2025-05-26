@@ -1,0 +1,171 @@
+/* Tùy chỉnh cho mini calendar */
+.react-datepicker {
+  border: none !important;
+  box-shadow: none !important; /* Remove box shadow */
+  background-color: white !important;
+  padding: 0.75rem !important; /* Adjust overall padding */
+}
+
+/* Loại bỏ phần màu xám phía trên (header) của lịch nhỏ */
+.react-datepicker__header {
+  background-color: white !important;
+  border-bottom: none !important;
+  padding-top: 0 !important; /* Remove top padding */
+  height: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  margin-bottom: 0.75rem !important; /* Adjust margin below header */
+}
+
+/* Tùy chỉnh cho các nút điều hướng < > */
+.react-datepicker__navigation {
+  background-color: white !important;
+  border: none !important;
+  border-radius: 50% !important;
+  box-shadow: none !important; /* Remove box shadow */
+  width: 24px !important;
+  height: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  top: 0.75rem !important; /* Align with padding */
+}
+
+.react-datepicker__navigation-icon::before {
+  border-color: #888 !important;
+  border-width: 1px 1px 0 0 !important;
+}
+
+/* Tùy chỉnh cho phần hiển thị ngày tháng */
+.react-datepicker__day-name, 
+.react-datepicker__day {
+  color: #333 !important;
+  margin: 1px !important; /* Reduce margin between day cells */
+  width: 30px !important; /* Adjust day cell width */
+  height: 30px !important; /* Adjust day cell height */
+  line-height: 30px !important; /* Center text */
+}
+
+.react-datepicker__day--selected {
+  background-color: #9155FD !important;
+  color: white !important;
+}
+
+.react-datepicker__day:hover {
+  background-color: #f8f8f8 !important;
+}
+
+/* Tùy chỉnh cho container của lịch nhỏ */
+.calendar-mini-wrapper {
+  margin-bottom: 0 !important;
+  padding-bottom: 1.5rem; /* Add padding at the bottom */
+  border-bottom: 1px solid #eee; /* Add a subtle border */
+}
+
+/* Đảm bảo tháng và năm được hiển thị phù hợp */
+.react-datepicker__current-month {
+  font-size: 1rem !important; /* Adjust font size */
+  color: #333 !important;
+  font-weight: 500 !important;
+  margin-bottom: 10px !important; /* Adjust margin */
+}
+
+/* Tùy chỉnh cho FullCalendar (lịch lớn) */
+.fc .fc-toolbar {
+  height: 45px !important; /* Đặt chiều cao cố định cho thanh công cụ lịch lớn */
+  margin-bottom: 1rem !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.fc .fc-button {
+  background-color: white !important;
+  color: #333 !important;
+  border: none !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  padding: 0.5rem 0.8rem !important;
+  text-transform: capitalize !important;
+  height: 36px !important; /* Đồng bộ chiều cao nút */
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: #9155FD !important;
+  color: white !important;
+}
+
+.fc .fc-button:hover {
+  background-color: #f8f8f8 !important;
+  color: #333 !important;
+}
+
+.fc .fc-button-primary:not(:disabled).fc-button-active:hover,
+.fc .fc-button-primary:not(:disabled):active:hover {
+  background-color: #8045e8 !important;
+  color: white !important;
+}
+
+/* Đảm bảo icon và text trong các nút được căn giữa */
+.fc .fc-icon {
+  vertical-align: middle !important;
+  line-height: 1 !important;
+}
+
+/* Tùy chỉnh thêm cho lịch mini */
+.calendar-mini-wrapper .react-datepicker {
+  width: 100% !important;
+}
+
+/* Đảm bảo nút Add Event có chiều cao phù hợp
+/* .MuiButton-root { */
+/*   height: 45px; */
+/*   line-height: 1; */
+/* } */
+
+/* Refine date picker day cell styling */
+/* .react-datepicker__day { */
+/*     width: 28px !important; *//* Adjust day cell width *//*
+/*     height: 28px !important; *//* Adjust day cell height *//*
+/*     line-height: 28px !important; *//* Center text *//*
+/*     margin: 2px !important; *//* Adjust margin *//*
+/*     border-radius: 4px !important; *//* Slightly rounded corners *//*
+/* } *//*
+
+/* Refine selected day styling */
+/* .react-datepicker__day--selected, .react-datepicker__day--in-selecting-range, .react-datepicker__day--in-range { */
+/*     border-radius: 4px !important; *//* Apply border radius to selected state *//*
+/* } *//* */
+
+/* Style for event filters */
+.event-filters-wrapper {
+    padding-top: 1.5rem; /* Add padding at the top */
+}
+
+.event-filters-wrapper .MuiBox-root {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem; /* Space between filter items */
+}
+
+.event-filters-wrapper .MuiBox-root input[type="checkbox"] {
+    margin-right: 0.5rem; /* Space between checkbox and color dot/label */
+}
+
+.event-filters-wrapper .MuiBox-root .MuiBox-root {
+    /* Styles for color dot */
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.5rem;
+}
+
+.event-filters-wrapper .MuiBox-root label {
+    font-size: 0.875rem; /* Match caption typography */
+    color: #555; /* Adjust label color */
+}
+
+.event-filters-wrapper .MuiBox-root input[type="checkbox"]:checked + .MuiBox-root + label {
+     color: #333; /* Darker color when checked */
+     font-weight: 500; /* Bold when checked */
+}
