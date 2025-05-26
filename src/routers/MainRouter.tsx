@@ -14,6 +14,7 @@ import AddProductScreen from "../screens/product/AddProductScreen.tsx";
 import ProductDetailScreen from "../screens/product/ProductDetailScreen.tsx";
 import Profile from "../screens/auth/Profile.tsx";
 import Calendar from "../pages/calendar";
+import OrderManagementScreen from "../screens/orders/OrderManagementScreen.tsx";
 
 const { Content, Footer } = Layout;
 const MainRouter = () => {
@@ -71,6 +72,9 @@ const MainRouter = () => {
               <Route>
                 <Route path="/calendar" element={<Calendar />} />
               </Route>
+
+              {/* Order Management route */}
+              <Route path="/orders" element={<OrderManagementScreen />} />
 
               {/* Add more route here */}
             </Routes>

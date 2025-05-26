@@ -72,6 +72,11 @@ const SiderComponent = () => {
       label: <Link to={"/calendar"}>Calendar</Link>,
       icon: <AiOutlineCalendar size={20} />,
     },
+    {
+      key: "orders",
+      label: <Link to={"/orders"}>Quản lí Đơn hàng</Link>,
+      icon: <AiOutlineTable size={20} />,
+    },
   ];
   return (
     <Sider width={280} theme="light" style={{ height: "100vh" }}>
