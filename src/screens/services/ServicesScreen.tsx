@@ -1,19 +1,20 @@
 import {
   Button,
-  Drawer,
   Space,
-  Table,
-  TableProps,
-  Tag,
   Tooltip,
   Typography,
+  Card,
+  Row,
+  Col,
+  Image,
+  Tag,
   Spin,
+  Rate,
   Pagination,
   Flex,
 } from "antd";
 import { useEffect, useState } from "react";
-import { AiOutlinePlus } from "react-icons/ai";
-import { AiOutlineReload } from "react-icons/ai";
+import { AiOutlinePlus, AiOutlineReload, AiTwotoneEye } from "react-icons/ai";
 import { useNavigate } from "react-router";
 import { IServices } from "../../types/IServices";
 import useFetchServices from "../../hooks/services/useFetchServices";
@@ -22,7 +23,7 @@ import Swal from "sweetalert2";
 
 const ServicesScreen = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(9);
 
   const {
     data: services,
@@ -35,6 +36,7 @@ const ServicesScreen = () => {
   });
   const navigate = useNavigate();
   const deleteServiceMutation = useDeleteService();
+
   const handleDelete = (serviceId: string) => {
     Swal.fire({
       title: "Are you sure?",
@@ -57,54 +59,6 @@ const ServicesScreen = () => {
     });
   };
 
-  const columns: TableProps<IServices>["columns"] = [
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Estimated Time",
-      dataIndex: "estimatedTime",
-      key: "estimatedTime",
-    },
-    {
-      title: "Description",
-      dataIndex: "description",
-      key: "description",
-    },
-    {
-      title: "Category",
-      dataIndex: "categoryName",
-      key: "categoryName",
-    },
-    {
-      title: "Store",
-      dataIndex: "storeName",
-      key: "storeName",
-    },
-    {
-      title: "Status",
-      key: "status",
-      render: (_, { status }) => (
-        <Tag color={status ? "green" : "volcano"}>
-          {status ? "Active" : "Inactive"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Action",
-      key: "action",
-      render: (_, record: IServices) => (
-        <Space size="middle">
-          <a onClick={() => handleView(record.id)}>View</a>
-          <a onClick={() => handleView(record.id)}>Edit</a>
-          <a onClick={() => handleDelete(record.id)}>Delete</a>
-        </Space>
-      ),
-    },
-  ];
-
   useEffect(() => {
     document.title = "Service Management";
   }, []);
@@ -116,6 +70,7 @@ const ServicesScreen = () => {
   if (isError) {
     return <div>Error loading services</div>;
   }
+
   const handleView = (serviceId: string) => {
     navigate(`/services/${serviceId}`);
   };
@@ -130,73 +85,130 @@ const ServicesScreen = () => {
   };
 
   return (
-    <>
-      <Space
-        style={{ width: "100%", padding: "0px 20px" }}
-        direction="vertical"
-      >
-        <Typography style={{ fontSize: 30, marginTop: 20, fontWeight: 600 }}>
-          Service Management
-        </Typography>
+    <Space
+      style={{ width: "100%", padding: "0px 20px" }}
+      direction="vertical"
+    >
+      <Typography style={{ fontSize: 30, marginTop: 20, fontWeight: 600 }}>
+        Quản lý dịch vụ
+      </Typography>
 
-        <div
-          style={{
-            backgroundColor: "#fff",
-            width: "100%",
-            borderRadius: 10,
-            padding: "10px 20px",
-            marginTop: 20,
-            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <Flex justify="space-between" align="center">
-            <h3>Services List</h3>
-            <div>
+      <div
+        style={{
+          backgroundColor: "#fff",
+          width: "100%",
+          borderRadius: 10,
+          padding: "10px 20px",
+          marginTop: 20,
+          boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <Space align="center" style={{ width: "100%", marginBottom: 20 }}>
+          <h3>Danh sách dịch vụ</h3>
+          <div>
+            <Button
+              type="primary"
+              style={{ marginLeft: "auto", marginRight: 10 }}
+              icon={<AiOutlinePlus />}
+              onClick={handleAddView}
+            >
+              Thêm dịch vụ
+            </Button>
+            <Tooltip title="Tải lại">
               <Button
                 type="primary"
-                style={{ marginLeft: "auto", marginRight: 10 }}
-                icon={<AiOutlinePlus />}
-                onClick={handleAddView}
+                shape="circle"
+                icon={<AiOutlineReload />}
+                onClick={() => refetch()}
+              />
+            </Tooltip>
+          </div>
+        </Space>
+
+        <Row gutter={[16, 16]}>
+          {services?.items.map((service) => (
+            <Col xs={24} sm={12} md={8} key={service.id}>
+              <Card
+                hoverable
+                cover={
+                  <Image
+                    alt={service.name}
+                    src={service.image || "https://via.placeholder.com/300x200"}
+                    style={{ height: 200, objectFit: 'cover' }}
+                  />
+                }
+                actions={[
+                  <AiTwotoneEye
+                    key="view"
+                    size={20}
+                    onClick={() => handleView(service.id)}
+                  />,
+                ]}
               >
-                Add Service
-              </Button>
-              <Tooltip title="Reload">
-                <Button
-                  type="primary"
-                  shape="circle"
-                  icon={<AiOutlineReload />}
-                  onClick={() => refetch()}
+                <Card.Meta
+                  title={service.name}
+                  description={
+                    <Space direction="vertical" size="small">
+                      <div>
+                        <Tag color="green">{service.storeName}</Tag>
+                        <Tag color="blue">{service.categoryName}</Tag>
+                      </div>
+                      <div>
+                        <Typography.Text type="secondary">
+                          {service.description}
+                        </Typography.Text>
+                      </div>
+                      <div>
+                        <Typography.Text strong>
+                          Thời gian ước tính: {service.estimatedTime}
+                        </Typography.Text>
+                      </div>
+                      <div>
+                        <Rate disabled defaultValue={service.ratingAverage} style={{ fontSize: 14 }} />
+                        <Typography.Text type="secondary" style={{ marginLeft: 8 }}>
+                          ({service.totalReviews} đánh giá)
+                        </Typography.Text>
+                      </div>
+                      <div>
+                        <Typography.Text type="secondary">
+                          Số lần sử dụng: {service.totalUsed}
+                        </Typography.Text>
+                      </div>
+                      <div>
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                          {service.storeAddress}
+                        </Typography.Text>
+                      </div>
+                      <div>
+                        <Tag color={service.status ? "green" : "volcano"}>
+                          {service.status ? "Hoạt động" : "Không hoạt động"}
+                        </Tag>
+                      </div>
+                    </Space>
+                  }
                 />
-              </Tooltip>
-            </div>
-          </Flex>
-          <Table
-            columns={columns}
-            dataSource={services?.items}
-            style={{ width: "100%" }}
-            rowKey="id"
-            pagination={false}
-          />
-          <Pagination
-            current={currentPage}
-            pageSize={pageSize}
-            total={services?.totalItemsCount || 0}
-            onChange={handlePageChange}
-            showSizeChanger
-            pageSizeOptions={["5", "10", "20"]}
-          />
+              </Card>
+            </Col>
+          ))}
+        </Row>
+
+        <div style={{ marginTop: 20, textAlign: 'center' }}>
+          <Button
+            onClick={() => setCurrentPage(currentPage - 1)}
+            disabled={currentPage === 1}
+            style={{ marginRight: 8 }}
+          >
+            Trang trước
+          </Button>
+          <Button
+            onClick={() => setCurrentPage(currentPage + 1)}
+            disabled={currentPage * pageSize >= (services?.totalItemsCount || 0)}
+          >
+            Trang sau
+          </Button>
         </div>
-      </Space>
-      <Drawer
-        closable
-        destroyOnClose
-        title={<p>Service Detail</p>}
-        placement="right"
-        width={600}
-      >
-        <p>Service details will be displayed here.</p>
-      </Drawer>
-    </>
+      </div>
+    </Space>
   );
 };
 

@@ -8,6 +8,7 @@ import { AiFillContainer, AiFillProduct, AiFillShop } from "react-icons/ai";
 import { AiOutlineTable } from "react-icons/ai";
 import { AiOutlineFileAdd } from "react-icons/ai";
 import { AiOutlineCalendar } from "react-icons/ai";
+import { AiOutlineBook } from "react-icons/ai";
 
 const { Sider } = Layout;
 const { Text } = Typography;
@@ -17,65 +18,70 @@ const SiderComponent = () => {
   const items: MenuItem[] = [
     {
       key: "stores",
-      label: "Stores Management",
+      label: "Quản lý Cửa hàng",
       icon: <AiFillShop size={20} />,
       children: [
         {
           key: "stores",
-          label: <Link to={"/stores"}>All</Link>,
+          label: <Link to={"/stores"}>Tất cả</Link>,
           icon: <AiOutlineTable />,
         },
         {
           key: "addNew",
-          label: <Link to={`/stores/add-store`}>Add new</Link>,
+          label: <Link to={`/stores/add-store`}>Thêm mới</Link>,
           icon: <AiOutlineFileAdd />,
         },
       ],
     },
     {
       key: "products",
-      label: "Product Management",
+      label: "Quản lý Sản phẩm",
       icon: <AiFillProduct size={20} />,
 
       children: [
         {
           key: "products",
-          label: <Link to={"/products"}>All</Link>,
+          label: <Link to={"/products"}>Tất cả</Link>,
           icon: <AiOutlineTable />,
         },
         {
           key: "addNewProduct",
-          label: <Link to={`/products/add-product`}>Add new</Link>,
+          label: <Link to={`/products/add-product`}>Thêm mới</Link>,
           icon: <AiOutlineFileAdd />,
         },
       ],
     },
     {
       key: "services",
-      label: "Services Management",
+      label: "Quản lý Dịch vụ",
       icon: <AiFillContainer size={20} />,
       children: [
         {
           key: "stores",
-          label: <Link to={"/services"}>All</Link>,
+          label: <Link to={"/services"}>Tất cả</Link>,
           icon: <AiOutlineTable />,
         },
         {
           key: "addNew",
-          label: <Link to={`/services/add-service`}>Add new</Link>,
+          label: <Link to={`/services/add-service`}>Thêm mới</Link>,
           icon: <AiOutlineFileAdd />,
         },
       ],
     },
     {
       key: "calendar",
-      label: <Link to={"/calendar"}>Calendar</Link>,
+      label: <Link to={"/calendar"}>Lịch</Link>,
       icon: <AiOutlineCalendar size={20} />,
     },
     {
       key: "orders",
-      label: <Link to={"/orders"}>Quản lí Đơn hàng</Link>,
+      label: <Link to={"/orders"}>Quản lý Đơn hàng</Link>,
       icon: <AiOutlineTable size={20} />,
+    },
+    {
+      key: "bookings",
+      label: <Link to={"/bookings"}>Quản lý Đặt lịch</Link>,
+      icon: <AiOutlineBook size={20} />,
     },
   ];
   return (

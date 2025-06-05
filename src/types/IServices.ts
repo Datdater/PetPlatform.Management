@@ -6,6 +6,13 @@ export interface IServices {
     estimatedTime: string;
     serviceCategoryId: string;
     status: boolean;
+    image: string;
+    storeName: string;
+    storeAddress: string;
+    categoryName: string;
+    totalUsed: number;
+    totalReviews: number;
+    ratingAverage: number;
 }
 
 export interface ServicesResponse {
@@ -45,5 +52,8 @@ export interface IServiceDetailResponse {
     status: boolean;
     petServiceDetails: PetServiceDetail[];
     petServiceSteps: PetServiceStep[];
+    totalUsed: number;
+    totalReviews: number;
+    ratingAverage: number;
 }
 

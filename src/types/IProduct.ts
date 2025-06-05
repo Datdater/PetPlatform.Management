@@ -15,42 +15,82 @@ export interface ProductPrice {
 }
 
 export interface IAddProduct {
-  productCategoryId: string;
-  name: string;
-  isActive: boolean;
-  productCode: string;
-  views: number;
-  brandId: string;
+  categoryId: string;
   storeId: string;
-  productTypes: ProductType[];
-  productPrices: ProductPrice[];
+  name: string;
+  description: string;
+  basePrice: number;
+  weight: number;
+  length: number;
+  height: number;
+  variants: {
+    attributes: string;
+    price: number;
+    stock: number;
+  }[];
+  images: {
+    imageUrl: string;
+    isMain: boolean;
+  }[];
 }
+
 export interface IProduct {
   id: string;
   name: string;
-  productCode: string;
-  brandName: string;
+  price: number;
+  storeId: string;
   storeName: string;
-  categoryName: string;
-  minPrices: number;
+  storeLogoUrl: string;
+  storeProvince: string;
+  storeDistrict: string;
+  storeWard: string;
+  storeStreet: string;
+  categoryId: string;
+  productImage: string;
+  starAverage: number;
+  reviewCount: number;
+  sold: number;
 }
+
+export interface ProductVariant {
+  attributes: {
+    [key: string]: string;
+  };
+  price: number;
+  stock: number;
+}
+
+export interface ProductImage {
+  imageUrl: string;
+  isMain: boolean;
+}
+
 export interface IProductDetail {
   id: string;
-  categoryName: string;
   name: string;
-  isActive: boolean;
-  productDescription: string;
-  views: number;
-  brandName: string;
+  description: string;
+  storeId: string;
   storeName: string;
-  productTypes: ProductType[];
-  productPrices: ProductPrice[];
-  productImages: IProductImages[];
+  storeUrl: string | null;
+  categoryId: string;
+  categoryName: string;
+  basePrice: number;
+  weight: number;
+  length: number;
+  height: number;
+  sold: number;
+  starAverage: number;
+  reviewCount: number;
+  variants: ProductVariant[];
+  images: ProductImage[];
+  reviews: any | null;
 }
+
 export interface IProductImages {
   id: string;
   url: string;
 }
+
 export interface IUpdateProduct {
   id: string;
   productCategoryId: string;

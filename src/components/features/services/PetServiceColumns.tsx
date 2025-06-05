@@ -4,49 +4,49 @@ import { PetServiceDetail } from "../../../types/IServices";
 
 export const petServiceColumns = (handleUpdate: (record: PetServiceDetail) => void, handleDelete: (id: string | null) => void) => [
     {
-        title: "Service Type",
+        title: "Loại dịch vụ",
         dataIndex: "name",
         key: "name",
     },
     {
-        title: "Description",
+        title: "Mô tả",
         dataIndex: "description",
         key: "description",
     },
     {
-        title: "Price",
+        title: "Giá",
         dataIndex: "amount",
         key: "amount",
-        render: (amount: number) => <span>${amount}</span>,
+        render: (amount: number) => <span>{amount.toLocaleString('vi-VN')}đ</span>,
     },
     {
-        title: "Pet Weight",
+        title: "Cân nặng thú cưng",
         key: "petWeight",
         render: (_: any, record: PetServiceDetail) => (
             <span>{record.petWeightMin} - {record.petWeightMax} kg</span>
         ),
     },
     {
-        title: "Pet Type",
+        title: "Loại thú cưng",
         key: "petType",
         render: (_: any, record: PetServiceDetail) => (
-            <Tag color={record.petType ? "green" : "volcano"}>{record.petType ? "Dog" : "Cat"}</Tag>
+            <Tag color={record.petType ? "green" : "volcano"}>{record.petType ? "Chó" : "Mèo"}</Tag>
         ),
     },
     {
-        title: "Action",
+        title: "Thao tác",
         key: "action",
         render: (_: any, record: PetServiceDetail) => (
             <Space size="middle">
                 <Button icon={<AiOutlineEdit />} onClick={() => handleUpdate(record)}>
-                    Update
+                    Cập nhật
                 </Button>
                 <Button
                     danger
                     icon={<AiOutlineDelete />}
                     onClick={() => handleDelete(record.id)}
                 >
-                    Delete
+                    Xóa
                 </Button>
             </Space>
         ),

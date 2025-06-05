@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Tag, Space, Table, Typography, Spin } from "antd";
+import { Button, Tag, Space, Table, Typography, Spin, Rate } from "antd";
 import { AiOutlinePlus } from "react-icons/ai";
 import { PetServiceDetail, PetServiceStep, IServiceDetailResponse } from "../../types/IServices";
 import { useFetchService } from "../../hooks/services/useFetchService";
@@ -62,7 +62,7 @@ const ServiceDetail: React.FC = () => {
     }
 
     if (isError && !localServiceDetail) {
-        return <div>Error: Service not found</div>;
+        return <div>Lỗi: Không tìm thấy dịch vụ</div>;
     }
 
     const handleUpdateServiceDetail = () => {
@@ -81,7 +81,7 @@ const ServiceDetail: React.FC = () => {
 
             setLocalServiceDetail(updatedService);
             setIsServiceDetailModalVisible(false);
-            Swal.fire("Success", "Service details updated successfully", "success");
+            Swal.fire("Thành công", "Cập nhật thông tin dịch vụ thành công", "success");
         }
     };
 
@@ -105,16 +105,15 @@ const ServiceDetail: React.FC = () => {
         setIsUpdateModalVisible(true);
     };
 
-
     const handleDelete = (detailId: string | null) => {
         Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to revert this!",
+            title: "Bạn có chắc chắn?",
+            text: "Bạn sẽ không thể hoàn tác hành động này!",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, delete it!"
+            confirmButtonText: "Có, xóa nó!"
         }).then(async (result) => {
             if (result.isConfirmed) {
                 if (localServiceDetail) {
@@ -133,22 +132,22 @@ const ServiceDetail: React.FC = () => {
                             await deleteServiceDetailMutation.mutateAsync({ serviceId, serviceDetailId: detailId });
                             console.log("Successfully deleted service detail with ID:", detailId);
                             Swal.fire(
-                                "Deleted!",
-                                "Service detail has been deleted.",
+                                "Đã xóa!",
+                                "Chi tiết dịch vụ đã được xóa.",
                                 "success"
                             );
                         } catch (error) {
                             console.error("Error deleting service detail:", error);
                             Swal.fire(
-                                "Error!",
-                                "Failed to delete from server, but removed from UI.",
+                                "Lỗi!",
+                                "Không thể xóa từ máy chủ, nhưng đã xóa khỏi giao diện.",
                                 "warning"
                             );
                         }
                     } else {
                         Swal.fire(
-                            "Removed!",
-                            "Service detail has been removed.",
+                            "Đã xóa!",
+                            "Chi tiết dịch vụ đã được xóa.",
                             "success"
                         );
                     }
@@ -159,13 +158,13 @@ const ServiceDetail: React.FC = () => {
 
     const handleDeleteStep = (stepId: string | null) => {
         Swal.fire({
-            title: "Are you sure?",
-            text: "You won't be able to revert this!",
+            title: "Bạn có chắc chắn?",
+            text: "Bạn sẽ không thể hoàn tác hành động này!",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
-            confirmButtonText: "Yes, delete it!"
+            confirmButtonText: "Có, xóa nó!"
         }).then(async (result) => {
             if (result.isConfirmed) {
                 if (localServiceDetail) {
@@ -184,22 +183,22 @@ const ServiceDetail: React.FC = () => {
                             await deleteServiceStepMutation.mutateAsync({ serviceId, serviceStepId: stepId });
                             console.log("Successfully deleted service step with ID:", stepId);
                             Swal.fire(
-                                "Deleted!",
-                                "Service step has been deleted.",
+                                "Đã xóa!",
+                                "Bước dịch vụ đã được xóa.",
                                 "success"
                             );
                         } catch (error) {
                             console.error("Error deleting service step:", error);
                             Swal.fire(
-                                "Error!",
-                                "Failed to delete from server, but removed from UI.",
+                                "Lỗi!",
+                                "Không thể xóa từ máy chủ, nhưng đã xóa khỏi giao diện.",
                                 "warning"
                             );
                         }
                     } else {
                         Swal.fire(
-                            "Removed!",
-                            "Service step has been removed.",
+                            "Đã xóa!",
+                            "Bước dịch vụ đã được xóa.",
                             "success"
                         );
                     }
@@ -220,7 +219,7 @@ const ServiceDetail: React.FC = () => {
             };
             setLocalServiceDetail(updatedService);
             setIsUpdateModalVisible(false);
-            Swal.fire("Success", "Service updated successfully", "success");
+            Swal.fire("Thành công", "Cập nhật dịch vụ thành công", "success");
         }
     };
 
@@ -235,7 +234,7 @@ const ServiceDetail: React.FC = () => {
 
             setLocalServiceDetail(updatedService);
             setIsAddModalVisible(false);
-            Swal.fire("Success", "Pet service added successfully", "success");
+            Swal.fire("Thành công", "Thêm chi tiết dịch vụ thú cưng thành công", "success");
         }
     };
 
@@ -264,7 +263,7 @@ const ServiceDetail: React.FC = () => {
             setLocalServiceDetail(updatedService);
             setIsStepModalVisible(false);
             setIsStepUpdateModalVisible(false);
-            Swal.fire("Success", step.id ? "Pet service step updated successfully" : "Pet service step added successfully", "success");
+            Swal.fire("Thành công", step.id ? "Cập nhật bước dịch vụ thành công" : "Thêm bước dịch vụ thành công", "success");
         }
     };
 
@@ -278,15 +277,15 @@ const ServiceDetail: React.FC = () => {
                 const parsedData: IServiceDetailResponse = JSON.parse(savedServiceDetail);
                 updateServiceMutation.mutate(parsedData, {
                     onSuccess: () => {
-                        Swal.fire("Success", "All changes saved successfully", "success");
+                        Swal.fire("Thành công", "Đã lưu tất cả thay đổi", "success");
                     },
                     onError: () => {
-                        Swal.fire("Error", "Failed to save changes", "error");
+                        Swal.fire("Lỗi", "Không thể lưu thay đổi", "error");
                     }
                 });
             } catch (error) {
                 console.error("Error parsing saved service data:", error);
-                Swal.fire("Error", "Failed to save changes", "error");
+                Swal.fire("Lỗi", "Không thể lưu thay đổi", "error");
             }
         }
     };
@@ -301,21 +300,32 @@ const ServiceDetail: React.FC = () => {
                     <Typography.Title level={2}>{localServiceDetail?.name}</Typography.Title>
                     <Typography.Paragraph>{localServiceDetail?.description}</Typography.Paragraph>
                     <Space direction="vertical" size="middle">
-                        <Typography.Text strong>Estimated Time: {localServiceDetail?.estimatedTime}</Typography.Text>
+                        <Typography.Text strong>Thời gian ước tính: {localServiceDetail?.estimatedTime}</Typography.Text>
+                        <div>
+                            <Rate disabled defaultValue={localServiceDetail?.ratingAverage} style={{ fontSize: 14 }} />
+                            <Typography.Text type="secondary" style={{ marginLeft: 8 }}>
+                                ({localServiceDetail?.totalReviews} đánh giá)
+                            </Typography.Text>
+                        </div>
+                        <div>
+                            <Typography.Text type="secondary">
+                                Số lần sử dụng: {localServiceDetail?.totalUsed}
+                            </Typography.Text>
+                        </div>
                         <Tag color={localServiceDetail?.status ? "green" : "volcano"}>
-                            {localServiceDetail?.status ? "Active" : "Inactive"}
+                            {localServiceDetail?.status ? "Hoạt động" : "Không hoạt động"}
                         </Tag>
                     </Space>
                 </div>
             </div>
 
             <div style={{ paddingLeft: "5px" }}>
-                <Button type="link" onClick={handleUpdateServiceDetail}>Update</Button>
+                <Button type="link" onClick={handleUpdateServiceDetail}>Cập nhật</Button>
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
                 <Typography.Title level={4} style={{ margin: 0 }}>
-                    Pet Service Details
+                    Chi tiết dịch vụ thú cưng
                 </Typography.Title>
                 <Button
                     type="primary"
@@ -329,7 +339,7 @@ const ServiceDetail: React.FC = () => {
                         fontSize: "14px"
                     }}
                 >
-                    Add Pet Service Detail
+                    Thêm chi tiết dịch vụ
                 </Button>
             </div>
 
@@ -341,16 +351,16 @@ const ServiceDetail: React.FC = () => {
                 style={{ flex: 1 }}
             />
 
-            <Typography.Title level={4}>Service Steps</Typography.Title>
+            <Typography.Title level={4}>Các bước dịch vụ</Typography.Title>
             <Button
                 type="primary"
                 style={{ marginTop: 10, marginBottom: 20 }}
                 icon={<AiOutlinePlus />}
                 onClick={handleAddPetServiceStep}
             >
-                Add Pet Service Step
+                Thêm bước dịch vụ
             </Button>
-            <div style={{ paddingLeft: "30px", borderLeft: "2px solid #1890ff", marginBottom: "20px" }}>
+            <div style={{ width: '30%', paddingLeft: "30px", borderLeft: "2px solid #1890ff", marginBottom: "20px" }}>
                 {localServiceDetail?.petServiceSteps?.map((step, index) => (
                     <div
                         key={step.id}
@@ -360,7 +370,7 @@ const ServiceDetail: React.FC = () => {
                             flexDirection: "column",
                         }}
                     >
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                             <div style={{ display: "flex", alignItems: "center" }}>
                                 <div
                                     style={{
@@ -382,8 +392,8 @@ const ServiceDetail: React.FC = () => {
                                 </Typography.Text>
                             </div>
                             <div>
-                                <Button type="link" onClick={() => handleUpdateStep(step)}>Update</Button>
-                                <Button type="link" danger onClick={() => handleDeleteStep(step?.id)}>Delete</Button>
+                                <Button type="link" onClick={() => handleUpdateStep(step)}>Cập nhật</Button>
+                                <Button type="link" danger onClick={() => handleDeleteStep(step?.id)}>Xóa</Button>
                             </div>
                         </div>
                         <Typography.Paragraph style={{ marginTop: "5px", color: "#595959" }}>
@@ -398,7 +408,7 @@ const ServiceDetail: React.FC = () => {
                 style={{ marginTop: 20 }}
                 onClick={handleSaveAllChanges}
             >
-                Save All Changes
+                Lưu tất cả thay đổi
             </Button>
 
             <PetServiceModals

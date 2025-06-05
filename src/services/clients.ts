@@ -4,12 +4,20 @@ const storedData = localStorage.getItem("auth-storage");
 const parsedData = JSON.parse(storedData!);
 const accessToken = parsedData?.state.token;
 
-console.log("data:::", parsedData);
+// Create base client with common configuration
+const createClient = (baseURL: string) => {
+  return axios.create({
+    baseURL,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+};
 
-export const client = axios.create({
-  baseURL: `${import.meta.env.VITE_BACKEND_URL}`,
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${accessToken}`, // ✅ Add Authorization header if accessToken exists
-  },
-});
+// Create specific clients for different services
+export const productClient = createClient(`${import.meta.env.VITE_BACKEND_URL}`);
+export const serviceClient = createClient(`${import.meta.env.VITE_SERVICE_BACKEND_URL}`);
+
+// Export default client for backward compatibility
+export const client = productClient;

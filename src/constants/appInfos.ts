@@ -1,8 +1,10 @@
+import logo from '../assets/SEN&PET _ LOGO.png';
+
 export const localDataNames = {
   authData: "auth-storage",
 };
 export const appInfo = {
-  logo: "https://petstation.vn/upload/hinhanh/logo-2206.png",
-  title: "PetMall",
+  logo,
+  title: "SEN&PET",
   description: "",
 };

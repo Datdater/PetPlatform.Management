@@ -87,20 +87,20 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
   return (
     <>
       <Modal
-        title="Update Service Detail"
+        title="Cập nhật thông tin dịch vụ"
         visible={isServiceDetailModalVisible}
         onCancel={() => setIsServiceDetailModalVisible(false)}
         footer={null}
       >
         <Form form={form} onFinish={handleSaveServiceDetail} layout="vertical">
           <Form.Item
-            label="Name"
+            label="Tên dịch vụ"
             name="name"
             rules={[
-              { required: true, message: "Please input the name!" },
+              { required: true, message: "Vui lòng nhập tên dịch vụ!" },
               {
                 pattern: /^[a-zA-Z0-9À-ỹ\s]+$/,
-                message: "Tên sản phẩm không được chứa ký tự đặc biệt",
+                message: "Tên dịch vụ không được chứa ký tự đặc biệt",
               },
             ]}
           >
@@ -108,46 +108,46 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
           </Form.Item>
 
           <Form.Item
-            label="Description"
+            label="Mô tả"
             name="description"
             rules={[
-              { required: true, message: "Please input the description!" },
+              { required: true, message: "Vui lòng nhập mô tả!" },
             ]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label="Estimated Time"
+            label="Thời gian ước tính"
             name="estimatedTime"
             rules={[
-              { required: true, message: "Please input the estimated time!" },
+              { required: true, message: "Vui lòng nhập thời gian ước tính!" },
             ]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label="Status"
+            label="Trạng thái"
             name="status"
-            rules={[{ required: true, message: "Please select the status!" }]}
+            rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}
           >
             <Select>
-              <Select.Option value={true}>Active</Select.Option>
-              <Select.Option value={false}>Inactive</Select.Option>
+              <Select.Option value={true}>Hoạt động</Select.Option>
+              <Select.Option value={false}>Không hoạt động</Select.Option>
             </Select>
           </Form.Item>
 
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Save Changes
+              Lưu thay đổi
             </Button>
           </Form.Item>
         </Form>
       </Modal>
       {/* Update Pet Service Modal */}
       <Modal
-        title="Update Pet Service"
+        title="Cập nhật dịch vụ thú cưng"
         open={isUpdateModalVisible}
         onCancel={() => setIsUpdateModalVisible(false)}
         footer={null}
@@ -163,49 +163,49 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
           </Form.Item>
 
           <Form.Item
-            label="Name"
+            label="Tên dịch vụ"
             name="name"
-            rules={[{ required: true, message: "Please input the name!" }]}
+            rules={[{ required: true, message: "Vui lòng nhập tên dịch vụ!" }]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label="Description"
+            label="Mô tả"
             name="description"
             rules={[
-              { required: true, message: "Please input the description!" },
+              { required: true, message: "Vui lòng nhập mô tả!" },
             ]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label="Price"
+            label="Giá"
             name="amount"
-            rules={[{ required: true, message: "Please input the price!" }]}
+            rules={[{ required: true, message: "Vui lòng nhập giá!" }]}
           >
             <Input type="number" />
           </Form.Item>
 
           <Form.Item
-            label="Pet Type"
+            label="Loại thú cưng"
             name="petType"
-            rules={[{ required: true, message: "Please select pet type!" }]}
+            rules={[{ required: true, message: "Vui lòng chọn loại thú cưng!" }]}
           >
             <Select>
-              <Select.Option value={true}>Dog</Select.Option>
-              <Select.Option value={false}>Cat</Select.Option>
+              <Select.Option value={true}>Chó</Select.Option>
+              <Select.Option value={false}>Mèo</Select.Option>
             </Select>
           </Form.Item>
 
           <Form.Item
-            label="Pet Weight Min"
+            label="Cân nặng tối thiểu"
             name="petWeightMin"
             rules={[
               {
                 required: true,
-                message: "Please input the minimum pet weight!",
+                message: "Vui lòng nhập cân nặng tối thiểu!",
               },
             ]}
           >
@@ -213,12 +213,12 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
           </Form.Item>
 
           <Form.Item
-            label="Pet Weight Max"
+            label="Cân nặng tối đa"
             name="petWeightMax"
             rules={[
               {
                 required: true,
-                message: "Please input the maximum pet weight!",
+                message: "Vui lòng nhập cân nặng tối đa!",
               },
               ({ getFieldValue }) => ({
                 validator(_, value) {
@@ -231,7 +231,7 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
                   }
                   return Promise.reject(
                     new Error(
-                      "Maximum pet weight must be greater than minimum pet weight"
+                      "Cân nặng tối đa phải lớn hơn cân nặng tối thiểu"
                     )
                   );
                 },
@@ -243,7 +243,7 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
 
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Save Changes
+              Lưu thay đổi
             </Button>
           </Form.Item>
         </Form>
@@ -251,56 +251,56 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
 
       {/* Add Pet Service Modal */}
       <Modal
-        title="Add New Pet Service"
+        title="Thêm dịch vụ thú cưng mới"
         open={isAddModalVisible}
         onCancel={() => setIsAddModalVisible(false)}
         footer={null}
       >
         <Form form={addForm} onFinish={handleSaveAdd} layout="vertical">
           <Form.Item
-            label="Name"
+            label="Tên dịch vụ"
             name="name"
-            rules={[{ required: true, message: "Please input the name!" }]}
+            rules={[{ required: true, message: "Vui lòng nhập tên dịch vụ!" }]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label="Description"
+            label="Mô tả"
             name="description"
             rules={[
-              { required: true, message: "Please input the description!" },
+              { required: true, message: "Vui lòng nhập mô tả!" },
             ]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label="Price"
+            label="Giá"
             name="amount"
-            rules={[{ required: true, message: "Please input the price!" }]}
+            rules={[{ required: true, message: "Vui lòng nhập giá!" }]}
           >
             <Input type="number" />
           </Form.Item>
 
           <Form.Item
-            label="Pet Type"
+            label="Loại thú cưng"
             name="petType"
-            rules={[{ required: true, message: "Please select pet type!" }]}
+            rules={[{ required: true, message: "Vui lòng chọn loại thú cưng!" }]}
           >
             <Select>
-              <Select.Option value={true}>Dog</Select.Option>
-              <Select.Option value={false}>Cat</Select.Option>
+              <Select.Option value={true}>Chó</Select.Option>
+              <Select.Option value={false}>Mèo</Select.Option>
             </Select>
           </Form.Item>
 
           <Form.Item
-            label="Pet Weight Min"
+            label="Cân nặng tối thiểu"
             name="petWeightMin"
             rules={[
               {
                 required: true,
-                message: "Please input the minimum pet weight!",
+                message: "Vui lòng nhập cân nặng tối thiểu!",
               },
             ]}
           >
@@ -308,12 +308,12 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
           </Form.Item>
 
           <Form.Item
-            label="Pet Weight Max"
+            label="Cân nặng tối đa"
             name="petWeightMax"
             rules={[
               {
                 required: true,
-                message: "Please input the maximum pet weight!",
+                message: "Vui lòng nhập cân nặng tối đa!",
               },
               ({ getFieldValue }) => ({
                 validator(_, value) {
@@ -326,7 +326,7 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
                   }
                   return Promise.reject(
                     new Error(
-                      "Maximum pet weight must be greater than minimum pet weight"
+                      "Cân nặng tối đa phải lớn hơn cân nặng tối thiểu"
                     )
                   );
                 },
@@ -338,7 +338,7 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
 
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Add Service
+              Thêm dịch vụ
             </Button>
           </Form.Item>
         </Form>
@@ -346,7 +346,7 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
 
       {/* Add Pet Service Step Modal */}
       <Modal
-        title="Add New Pet Service Step"
+        title="Thêm bước dịch vụ mới"
         open={isStepModalVisible}
         onCancel={() => setIsStepModalVisible(false)}
         footer={null}
@@ -359,18 +359,18 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
           layout="vertical"
         >
           <Form.Item
-            label="Step Name"
+            label="Tên bước"
             name="name"
-            rules={[{ required: true, message: "Please input the step name!" }]}
+            rules={[{ required: true, message: "Vui lòng nhập tên bước!" }]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label="Description"
+            label="Mô tả"
             name="description"
             rules={[
-              { required: true, message: "Please input the description!" },
+              { required: true, message: "Vui lòng nhập mô tả!" },
             ]}
           >
             <Input />
@@ -383,7 +383,7 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
 
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Add Step
+              Thêm bước
             </Button>
           </Form.Item>
         </Form>
@@ -391,7 +391,7 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
 
       {/* Update Pet Service Step Modal */}
       <Modal
-        title="Update Pet Service Step"
+        title="Cập nhật bước dịch vụ"
         open={isStepUpdateModalVisible}
         onCancel={() => setIsStepUpdateModalVisible(false)}
         footer={null}
@@ -410,18 +410,18 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
           initialValues={newStep || {}}
         >
           <Form.Item
-            label="Step Name"
+            label="Tên bước"
             name="name"
-            rules={[{ required: true, message: "Please input the step name!" }]}
+            rules={[{ required: true, message: "Vui lòng nhập tên bước!" }]}
           >
             <Input />
           </Form.Item>
 
           <Form.Item
-            label="Description"
+            label="Mô tả"
             name="description"
             rules={[
-              { required: true, message: "Please input the description!" },
+              { required: true, message: "Vui lòng nhập mô tả!" },
             ]}
           >
             <Input />
@@ -437,7 +437,7 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
 
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Update Step
+              Cập nhật bước
             </Button>
           </Form.Item>
         </Form>

@@ -1,7 +1,7 @@
 import {IServiceCategories} from "../types/IServiceCategories.ts";
-import { client } from "./clients";
+import { serviceClient } from "./clients";
 
 export const fetchServiceCategories = async () => {
-    const response = await client.get<IServiceCategories[]>("/service-categories");
+    const response = await serviceClient.get<IServiceCategories[]>(`/services/categories`);
     return response.data;
 };

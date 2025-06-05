@@ -15,6 +15,8 @@ import ProductDetailScreen from "../screens/product/ProductDetailScreen.tsx";
 import Profile from "../screens/auth/Profile.tsx";
 import Calendar from "../pages/calendar";
 import OrderManagementScreen from "../screens/orders/OrderManagementScreen.tsx";
+import BookingManagementScreen from "../screens/bookings/BookingManagementScreen.tsx";
+import BookingDetailScreen from "../screens/bookings/BookingDetailScreen.tsx";
 
 const { Content, Footer } = Layout;
 const MainRouter = () => {
@@ -74,7 +76,15 @@ const MainRouter = () => {
               </Route>
 
               {/* Order Management route */}
-              <Route path="/orders" element={<OrderManagementScreen />} />
+              <Route>
+                <Route path="/orders" element={<OrderManagementScreen />} />
+              </Route>
+
+              {/* Booking Management route */}
+              <Route>
+                <Route path="/bookings" element={<BookingManagementScreen />} />
+                <Route path="/bookings/:id" element={<BookingDetailScreen />} />
+              </Route>
 
               {/* Add more route here */}
             </Routes>
