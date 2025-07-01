@@ -21,7 +21,6 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { uploadImage } from "../../../services/image.service";
-import MUIRichTextEditor from "mui-rte";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 

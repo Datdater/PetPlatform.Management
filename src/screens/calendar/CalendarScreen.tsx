@@ -226,8 +226,7 @@ const CalendarScreen: React.FC = () => {
             startHour: 8,
             endHour: 20,
             navigation: true,
-            disableGoToDay: false,
-            step: 60
+            disableGoToDay: false
           }}
           translations={{
             navigation: {
