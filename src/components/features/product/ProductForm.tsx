@@ -261,7 +261,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 }
               >
                 <CKEditor
-                  editor={ClassicEditor}
+                  editor={ClassicEditor as any}
                   data={description}
                   onChange={(_event: any, editor: any) => {
                     const data = editor.getData();
