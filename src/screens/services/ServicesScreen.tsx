@@ -60,7 +60,7 @@ const ServicesScreen = () => {
   };
 
   useEffect(() => {
-    document.title = "Service Management";
+    document.title = "Quản lý Dịch vụ";
   }, []);
 
   if (isError) {
@@ -86,7 +86,7 @@ const ServicesScreen = () => {
       direction="vertical"
     >
       <Typography style={{ fontSize: 30, marginTop: 20, fontWeight: 600 }}>
-        Quản lý dịch vụ
+        Quản lý Dịch vụ
       </Typography>
 
       <div

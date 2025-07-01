@@ -44,10 +44,8 @@ const SignUp = () => {
       { ...values, ...formValues },
       {
         onSuccess: async () => {
-          message.success("Tạo cửa hàng thành công! Đang tự động đăng nhập...");
           const loginResult = await login(values.username, values.password);
           if (loginResult.success) {
-            message.success("Đăng nhập thành công!");
             navigate("/", { replace: true });
           } else {
             message.error(loginResult.error || "Đăng nhập tự động thất bại. Vui lòng đăng nhập thủ công.");

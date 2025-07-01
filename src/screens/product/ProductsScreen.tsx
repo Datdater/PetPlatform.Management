@@ -46,7 +46,7 @@ const ProductsScreen = () => {
 
   useEffect(() => {
     fetchProducts(currentPage, pageSize);
-    document.title = "Store Management";
+    document.title = "Quản lý Sản phẩm";
   }, [currentPage, pageSize]);
 
   return (

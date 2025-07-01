@@ -69,20 +69,67 @@ const SiderComponent = () => {
   ];
   return (
     <Sider width={280} theme="light" style={{ height: "100vh" }}>
-      <Flex style={{ padding: "20px" }} align="middle">
-        <Image width={40} src={appInfo.logo} alt={appInfo.title} />
+      <Flex style={{ padding: "20px", alignItems: "center" }} align="middle">
+        <Image width={64} src={appInfo.logo} alt={appInfo.title} preview={false} />
         <Text
           style={{
             fontWeight: "bold",
             fontSize: "1.5rem",
-            color: colors.primary500,
+            color: "#5abab5",
             margin: 0,
+            marginLeft: 16,
+            display: "flex",
+            alignItems: "center",
+            height: 64,
           }}
         >
           {appInfo.title}
         </Text>
       </Flex>
-      <Menu mode="inline" items={items} theme="light" />
+      <Menu
+        mode="inline"
+        items={items}
+        theme="light"
+        style={{
+          borderRight: 0,
+        }}
+      />
+      <style>{`
+        .ant-menu-light .ant-menu-item-selected,
+        .ant-menu-light .ant-menu-item-active,
+        .ant-menu-light .ant-menu-item:hover,
+        .ant-menu-light .ant-menu-submenu-selected > .ant-menu-submenu-title,
+        .ant-menu-light .ant-menu-submenu-active > .ant-menu-submenu-title,
+        .ant-menu-light .ant-menu-submenu-title:hover {
+          color: #5abab5 !important;
+          background: #e6f7f6 !important;
+        }
+        .ant-menu-light .ant-menu-item .anticon,
+        .ant-menu-light .ant-menu-submenu-title .anticon {
+          color: #5abab5 !important;
+        }
+        .ant-menu-light .ant-menu-item-selected .anticon,
+        .ant-menu-light .ant-menu-item-active .anticon,
+        .ant-menu-light .ant-menu-item:hover .anticon {
+          color: #5abab5 !important;
+        }
+        .ant-menu-light .ant-menu-item {
+          border-radius: 8px;
+        }
+        .ant-menu-light .ant-menu-submenu-open .ant-menu-submenu-title {
+          color: #5abab5 !important;
+        }
+        .ant-menu-light .ant-menu-submenu .ant-menu-item-selected {
+          color: #5abab5 !important;
+          background: #e6f7f6 !important;
+        }
+        .ant-menu-light .ant-menu-submenu .ant-menu-item-active {
+          color: #5abab5 !important;
+        }
+        .ant-menu-light .ant-menu-submenu .ant-menu-item:hover {
+          color: #5abab5 !important;
+        }
+      `}</style>
     </Sider>
   );
 };

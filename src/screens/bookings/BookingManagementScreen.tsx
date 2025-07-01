@@ -64,6 +64,10 @@ const BookingManagementScreen = () => {
         fetchData();
     }, []);
 
+    useEffect(() => {
+        document.title = 'Quản lý Đặt lịch';
+    }, []);
+
     const handleViewDetails = (booking: IBookingItem) => {
         setSelectedBooking(booking);
         setShowDetail(true);
@@ -217,7 +221,7 @@ const BookingManagementScreen = () => {
 
     return (
         <div style={{ padding: screens.md ? '24px' : '12px' }}>
-            <Title level={2}>Quản lý đặt lịch</Title>
+            <Title level={2}>Quản lý Đặt lịch</Title>
             <Card style={{ marginBottom: 24 }}>
                 <Flex justify="space-between" align="center" wrap="wrap" gap="middle">
                     <Space wrap>

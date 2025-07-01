@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Scheduler } from "@aldabil/react-scheduler";
 import { ProcessedEvent } from "@aldabil/react-scheduler/types";
 import { Card } from 'antd';
@@ -133,6 +133,10 @@ export const INITIAL_EVENTS: ProcessedEvent[] = [
 
 const CalendarScreen: React.FC = () => {
   const [events, setEvents] = useState<ProcessedEvent[]>(INITIAL_EVENTS);
+
+  useEffect(() => {
+    document.title = 'Lịch trình';
+  }, []);
 
   const checkOverlap = (newEvent: ProcessedEvent, allEvents: ProcessedEvent[]) => {
     const newEventStartHour = newEvent.start.getHours();

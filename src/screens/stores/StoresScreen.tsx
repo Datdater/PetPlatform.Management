@@ -8,6 +8,11 @@ import {
   TableProps,
   Tooltip,
   Typography,
+  Card,
+  Row,
+  Col,
+  Statistic,
+  Progress,
 } from "antd";
 import { useEffect, useState } from "react";
 import { colors } from "../../constants/colors";
@@ -18,6 +23,7 @@ import useFetchStores from "../../hooks/store/useFetchStores";
 import { IStore } from "../../types/IStore";
 import StoreDetail from "../../components/features/stores/StoreDetail";
 import { useQueryClient } from "@tanstack/react-query";
+import { PieChartOutlined, ShopOutlined, UserOutlined, AppstoreOutlined } from "@ant-design/icons";
 
 // interface DataType {
 //   key: string;
@@ -52,182 +58,85 @@ import { useQueryClient } from "@tanstack/react-query";
 // ];
 
 const StoresScreen = () => {
-  const columns: TableProps<IStore>["columns"] = [
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      render: (text) => <a>{text}</a>,
-    },
-    {
-      title: "Hotline",
-      dataIndex: "hotline",
-      key: "hotline",
-    },
-    {
-      title: "Business Type",
-      dataIndex: "businessType",
-      key: "businessType",
-    },
-    {
-      title: "Fax Code",
-      dataIndex: "faxCode",
-      key: "faxCode",
-    },
-    {
-      title: "Fax Email",
-      dataIndex: "faxEmail",
-      key: "faxEmail",
-    },
-    // {
-    //   title: "Tags",
-    //   key: "tags",
-    //   dataIndex: "tags",
-    //   render: (_, { tags }) => (
-    //     <>
-    //       {tags.map((tag) => {
-    //         let color = tag.length > 5 ? "geekblue" : "green";
-    //         if (tag === "loser") {
-    //           color = "volcano";
-    //         }
-    //         return (
-    //           <Tag color={color} key={tag}>
-    //             {tag.toUpperCase()}
-    //           </Tag>
-    //         );
-    //       })}
-    //     </>
-    //   ),
-    // },
-    {
-      title: "Action",
-      key: "action",
-      width: "15%",
-      render: (store: IStore) => (
-        <Space size="middle">
-          <a onClick={() => showLoading(store.id)}>View</a>
-        </Space>
-      ),
-    },
+  // Giả lập số liệu dashboard
+  const totalStores = 12;
+  const totalServices = 34;
+  const totalProducts = 120;
+  const totalUsers = 56;
+
+  // Dữ liệu cho chart demo
+  const pieData = [
+    { type: "Cửa hàng", value: totalStores },
+    { type: "Dịch vụ", value: totalServices },
+    { type: "Sản phẩm", value: totalProducts },
+    { type: "Người dùng", value: totalUsers },
   ];
-  const [openViewDrawer, setOpenViewDrawer] = useState<boolean>(false);
-  // const [openUpdateDrawer, setOpenUpdateDrawer] = useState<boolean>(false);
-  const [isDrawerLoading, setIsDrawerLoading] = useState<boolean>(false);
-
-  const [selectedStoreId, setSelectedStoreId] = useState<string | undefined>(
-    undefined
-  );
-
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
-
-  const showLoading = (id: string) => {
-    setOpenViewDrawer(true);
-    setIsDrawerLoading(true);
-    setSelectedStoreId(id);
-
-    // Simple loading mock. You should add cleanup logic in real world.
-    setTimeout(() => {
-      setIsDrawerLoading(false);
-    }, 500);
-  };
 
   useEffect(() => {
-    document.title = "Store Management";
+    document.title = "Store Dashboard";
   }, []);
 
-  const {
-    data: storeResponse,
-    isLoading,
-    isError,
-    isFetching,
-  } = useFetchStores();
-
   return (
-    <>
-      <Space
-        style={{ width: "100%", padding: "0px 20px" }}
-        direction="vertical"
-      >
-        <Typography style={{ fontSize: 30, marginTop: 20, fontWeight: 600 }}>
-          Store Management
-        </Typography>
-        {/* <Space
-          style={{
-            backgroundColor: colors.white,
-            width: "100%",
-            borderRadius: 10,
-            padding: 20,
-            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <h3>Filter</h3>
-        </Space> */}
-
-        <div
-          style={{
-            backgroundColor: colors.white,
-            width: "100%",
-            borderRadius: 10,
-            padding: "10px 20px",
-            marginTop: 20,
-            boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <Flex justify="space-between" align="center">
-            <h3>Stores List</h3>
-            <div>
-              <Button
-                type="primary"
-                style={{ marginLeft: "auto", marginRight: 10 }}
-                icon={<AiOutlinePlus />}
-                onClick={() => navigate("/stores/add-store", { replace: true })}
-              >
-                Add Store
-              </Button>
-              <Tooltip title="Reload">
-                <Button
-                  type="primary"
-                  shape="circle"
-                  icon={<AiOutlineReload />}
-                  onClick={() => {
-                    queryClient.invalidateQueries({ queryKey: ["stores"] });
-                  }}
-                />
-              </Tooltip>
-            </div>
-          </Flex>
-          {isLoading && <Spin />}
-          {isError && <p>Something went wrong</p>}
-          <Spin spinning={isFetching}>
-            <Table<IStore>
-              columns={columns}
-              dataSource={storeResponse?.items}
-              style={{ width: "100%" }}
+    <div style={{ padding: 24 }}>
+      <Typography.Title level={2} style={{ marginBottom: 24 }}>
+        Dashboard
+      </Typography.Title>
+      <Row gutter={[24, 24]}>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic
+              title="Tổng cửa hàng"
+              value={totalStores}
+              prefix={<ShopOutlined />}
             />
-          </Spin>
-        </div>
-      </Space>
-      <Drawer
-        closable
-        destroyOnClose
-        title={<p>Store detail</p>}
-        placement="right"
-        open={openViewDrawer}
-        loading={isDrawerLoading}
-        onClose={() => setOpenViewDrawer(false)}
-        width={600}
-      >
-        {/* <Button
-          type="primary"
-          style={{ marginBottom: 16 }}
-          onClick={showLoading}
-        >
-          Reload
-        </Button> */}
-        {selectedStoreId && <StoreDetail id={selectedStoreId} />}
-      </Drawer>
-    </>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic
+              title="Tổng dịch vụ"
+              value={totalServices}
+              prefix={<AppstoreOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic
+              title="Tổng sản phẩm"
+              value={totalProducts}
+              prefix={<PieChartOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} sm={12} md={6}>
+          <Card>
+            <Statistic
+              title="Tổng người dùng"
+              value={totalUsers}
+              prefix={<UserOutlined />}
+            />
+          </Card>
+        </Col>
+      </Row>
+      <Row gutter={[24, 24]} style={{ marginTop: 32 }}>
+        <Col xs={24} md={12}>
+          <Card title="Tỉ lệ phân bổ">
+            <div style={{ textAlign: "center" }}>
+              <Progress type="dashboard" percent={Math.round((totalStores / (totalStores + totalServices + totalProducts + totalUsers)) * 100)} format={percent => `Cửa hàng: ${percent}%`} />
+            </div>
+          </Card>
+        </Col>
+        <Col xs={24} md={12}>
+          <Card title="Biểu đồ demo">
+            <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <PieChartOutlined style={{ fontSize: 80, color: colors.primary500 }} />
+              <span style={{ marginLeft: 16, fontSize: 18, color: colors.primary500 }}>Biểu đồ sẽ hiển thị ở đây (có thể tích hợp thêm thư viện chart)</span>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+    </div>
   );
 };
 

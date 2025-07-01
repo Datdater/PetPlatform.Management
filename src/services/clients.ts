@@ -1,23 +1,33 @@
 import axios from "axios";
-
-const storedData = localStorage.getItem("auth-storage");
-const parsedData = JSON.parse(storedData!);
-const accessToken = parsedData?.state.token;
+import { useAuthStore } from "../stores/authStore";
 
 // Create base client with common configuration
-const createClient = (baseURL: string) => {
-  return axios.create({
+export const createClient = (baseURL: string) => {
+  const instance = axios.create({
     baseURL,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
     },
   });
+
+  // Interceptor: luôn lấy token mới nhất từ Zustand store
+  instance.interceptors.request.use(
+    (config) => {
+      const token = useAuthStore.getState().token;
+      if (token) {
+        config.headers = config.headers || {};
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  return instance;
 };
 
 // Create specific clients for different services
-export const feClient= createClient(`${import.meta.env.VITE_BACKEND_URL}`);
-
+export const feClient = createClient(`${import.meta.env.VITE_BACKEND_URL}`);
 
 // Export default client for backward compatibility
 export const client = feClient;

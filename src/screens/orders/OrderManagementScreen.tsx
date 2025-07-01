@@ -1,5 +1,5 @@
 import { Typography, Tabs, Table, DatePicker, Input, Button, Space, Flex, Card, Tag, Modal, Form, message, Spin, Grid, Dropdown, Menu } from 'antd';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { TabsProps, TableProps } from 'antd';
 import dayjs from 'dayjs';
 import OrderDetailScreen from './OrderDetailScreen';
@@ -307,13 +307,17 @@ const OrderManagementScreen = () => {
         return order.orderStatus.toLowerCase().replace(' ', '') === activeTab;
     });
 
+    useEffect(() => {
+        document.title = 'Quản lý Đơn hàng';
+    }, []);
+
     if (showDetail && selectedOrder) {
         return <OrderDetailScreen order={selectedOrder} onBack={() => setShowDetail(false)} />;
     }
 
     return (
         <div style={{ padding: screens.md ? '24px' : '12px' }}>
-            <Title level={2}>Quản lý đơn hàng</Title>
+            <Title level={2}>Quản lý Đơn hàng</Title>
             <Card style={{ marginBottom: 24 }}>
                 <Flex justify="space-between" align="center" wrap="wrap" gap="middle">
                     <Space wrap>

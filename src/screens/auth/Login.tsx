@@ -27,7 +27,6 @@ const Login = () => {
     );
     const authStore = useAuthStore.getState();
     if (success) {
-      message.success("Đăng nhập thành công!");
       if (isRemember) {
         localStorage.setItem(
           localDataNames.authData,
@@ -73,7 +72,7 @@ const Login = () => {
           <img
             src={appInfo.logo}
             alt="Logo"
-            style={{ width: 48, height: 48, marginBottom: 8 }}
+            style={{ width: 80, height: 80}}
           />
           <Title level={3} style={{ fontWeight: 600, color: "#333" }}>
             Đăng nhập tài khoản

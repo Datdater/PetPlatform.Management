@@ -17,6 +17,7 @@ import CalendarScreen from "../screens/calendar/CalendarScreen.tsx";
 import OrderManagementScreen from "../screens/orders/OrderManagementScreen.tsx";
 import BookingManagementScreen from "../screens/bookings/BookingManagementScreen.tsx";
 import BookingDetailScreen from "../screens/bookings/BookingDetailScreen.tsx";
+import { useParams } from "react-router-dom";
 
 const { Content, Footer } = Layout;
 const MainRouter = () => {
@@ -39,59 +40,34 @@ const MainRouter = () => {
               <Route path="/" element={<StoresScreen />} />
               <Route path="*" element={<NotFound />} />
               <Route path="/profile" element={<Profile />} />
-            </Routes>
 
               {/* Service route */}
-              <Route>
-                <Route path="/services" element={<ServicesScreen />} />
-                <Route
-                  path="/services/:serviceId"
-                  element={<ServiceDetailScreen />}
-                />
-                <Route
-                  path="/services/add-service"
-                  element={<AddServiceScreen />}
-                />
-              </Route>
+              <Route path="/services" element={<ServicesScreen />} />
+              <Route path="/services/:serviceId" element={<ServiceDetailScreen />} />
+              <Route path="/services/add-service" element={<AddServiceScreen />} />
 
               {/* Product route */}
-              <Route>
-                <Route path="/products" element={<ProductsScreen />} />
-                <Route
-                  path="/products/add-product"
-                  element={<AddProductScreen />}
-                />
-                <Route path="/products/:id" element={<ProductDetailScreen />} />
-              </Route>
+              <Route path="/products" element={<ProductsScreen />} />
+              <Route path="/products/add-product" element={<AddProductScreen />} />
+              <Route path="/products/:id" element={<ProductDetailScreen />} />
 
               {/* Store route */}
-              <Route>
-                <Route path="/stores" element={<StoresScreen />} />
-                <Route path="/stores/add-store" element={<AddStoreScreen />} />
-                <Route path="/stores/:id" element={<StoreDetailScreen />} />
-              </Route>
+              <Route path="/stores" element={<StoresScreen />} />
+              <Route path="/stores/add-store" element={<AddStoreScreen />} />
+              <Route path="/stores/:id" element={<StoreDetailScreen />} />
 
               {/* Calendar route */}
-              <Route>
-                <Route path="/calendar" element={<CalendarScreen />} />
-              </Route>
+              <Route path="/calendar" element={<CalendarScreen />} />
 
               {/* Order Management route */}
-              <Route>
-                <Route path="/orders" element={<OrderManagementScreen />} />
-              </Route>
+              <Route path="/orders" element={<OrderManagementScreen />} />
 
               {/* Booking Management route */}
               <Route path="/bookings" element={<BookingManagementScreen />} />
-              <Route
-                path="/bookings/:id"
-                element={
-                  // @ts-expect-error: BookingDetailScreen requires 'booking' prop, needs to be provided via loader or wrapper
-                  <BookingDetailScreen />
-                }
-              />
+              <Route path="/bookings/:id" element={<BookingDetailRouteWrapper />} />
 
               {/* Add more route here */}
+            </Routes>
           </Content>
           <Footer className="text-center">
             Sen&Pet Platform ©{new Date().getFullYear()} Created by Sen&Pet Platform
@@ -101,5 +77,44 @@ const MainRouter = () => {
     </BrowserRouter>
   );
 };
+
+function BookingDetailRouteWrapper() {
+  const { id } = useParams();
+  // Lấy danh sách bookings từ localStorage (hoặc có thể fetch từ API nếu cần)
+  const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
+  const selectedBooking = bookings.find((b: any) => b.bookingId === id);
+
+  if (!selectedBooking) return <NotFound />;
+
+  // Mapping sang đúng props như trong BookingManagementScreen
+  const bookingDetailProps = {
+    id: selectedBooking.bookingId,
+    customerInfo: {
+      name: selectedBooking.userName,
+      phone: selectedBooking.userPhone,
+      address: selectedBooking.userAddress || "",
+    },
+    service: {
+      name: selectedBooking.petWithServices?.[0]?.services?.[0]?.serviceDetailName || "",
+      price: selectedBooking.totalPrice,
+      duration: "",
+      image: "",
+    },
+    petInfo: {
+      name: selectedBooking.petWithServices?.[0]?.pet?.name || "",
+      type: String(selectedBooking.petWithServices?.[0]?.pet?.petType || ""),
+      breed: (selectedBooking.petWithServices?.[0]?.pet as any)?.breed || "",
+      age: (selectedBooking.petWithServices?.[0]?.pet as any)?.age || 0,
+    },
+    totalAmount: selectedBooking.totalPrice,
+    status: String(selectedBooking.status),
+    bookingDate: selectedBooking.bookingTime,
+    bookingTime: selectedBooking.bookingTime,
+    paymentMethod: selectedBooking.paymentMethod || "",
+    note: selectedBooking.note || "",
+  };
+
+  return <BookingDetailScreen booking={bookingDetailProps} />;
+}
 
 export default MainRouter;

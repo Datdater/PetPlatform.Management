@@ -39,6 +39,7 @@ const HeaderComponent = () => {
       onClick: async () => {
         await logout();
         navigate("/");
+        window.location.reload();
       },
     },
   ];
