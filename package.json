@@ -40,7 +40,7 @@
     "antd": "^5.24.2",
     "axios": "^1.8.1",
     "bootstrap-icons": "^1.13.1",
-    "date-fns": "^4.1.0",
+    "date-fns": "^3.6.0",
     "firebase": "^11.4.0",
     "iconsax-react": "^0.0.8",
     "lucide-react": "^0.511.0",
