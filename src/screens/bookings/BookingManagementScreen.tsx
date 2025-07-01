@@ -186,7 +186,33 @@ const BookingManagementScreen = () => {
     });
 
     if (showDetail && selectedBooking) {
-        return <BookingDetailScreen booking={selectedBooking} />;
+        const bookingDetailProps = {
+            id: selectedBooking.bookingId,
+            customerInfo: {
+                name: selectedBooking.userName,
+                phone: selectedBooking.userPhone,
+                address: (selectedBooking as any).userAddress || '',
+            },
+            service: {
+                name: selectedBooking.petWithServices?.[0]?.services?.[0]?.serviceDetailName || '',
+                price: selectedBooking.totalPrice,
+                duration: '',
+                image: '',
+            },
+            petInfo: {
+                name: selectedBooking.petWithServices?.[0]?.pet?.name || '',
+                type: String(selectedBooking.petWithServices?.[0]?.pet?.petType || ''),
+                breed: (selectedBooking.petWithServices?.[0]?.pet as any)?.breed || '',
+                age: (selectedBooking.petWithServices?.[0]?.pet as any)?.age || 0,
+            },
+            totalAmount: selectedBooking.totalPrice,
+            status: String(selectedBooking.status),
+            bookingDate: selectedBooking.bookingTime,
+            bookingTime: selectedBooking.bookingTime,
+            paymentMethod: (selectedBooking as any).paymentMethod || '',
+            note: (selectedBooking as any).note || '',
+        };
+        return <BookingDetailScreen booking={bookingDetailProps} />;
     }
 
     return (

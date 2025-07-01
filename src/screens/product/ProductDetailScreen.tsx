@@ -239,12 +239,16 @@ const ProductDetailScreen: React.FC = () => {
                                         style={{ width: '100%', fontSize: '20px' }}
                                         value={editedProduct.basePrice}
                                         onChange={(value) => handleInputChange('basePrice', value)}
-                                        formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                                        parser={value => value!.replace(/\$\s?|(,*)/g, '')}
+                                        formatter={(value) => value ? value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') : ''}
+                                        parser={(displayValue) => {
+                                            const parsed = displayValue ? displayValue.replace(/\$\s?|(,*)/g, '') : '';
+                                            const num = Number(parsed);
+                                            return isNaN(num) ? 0 : num;
+                                        }}
                                         addonAfter="VND"
                                     />
                                 ) : (
-                                    <Title level={4}>
+                                    <Title level={4} style={{ margin: 0 }}>
                                         {(selectedVariant ? selectedVariant.price : product.basePrice).toLocaleString('vi-VN')} VND
                                     </Title>
                                 )}

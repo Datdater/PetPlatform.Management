@@ -18,7 +18,7 @@ const Routers = () => {
         if (storedData) {
           const parsedData = JSON.parse(storedData);
           if (parsedData.token) {
-            setAuth(null, parsedData.token); // ✅ Truyền đúng định dạng {user, token}
+            setAuth(parsedData.user ?? null, parsedData.token ?? null, parsedData.refreshToken ?? null);
             console.log("Parsed auth data:", parsedData);
           }
         }

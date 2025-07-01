@@ -17,12 +17,12 @@ const Login = () => {
 
 
   const handleLogin = async (values: {
-    emailOrPhone: string;
+    emailOrUserNameOrPhone: string;
     password: string;
   }) => {
     setIsLoading(true);
     const { success, error } = await login(
-      values.emailOrPhone,
+      values.emailOrUserNameOrPhone,
       values.password
     );
     const authStore = useAuthStore.getState();
@@ -83,12 +83,12 @@ const Login = () => {
 
         <Form layout="vertical" form={form} onFinish={handleLogin} size="large">
           <Form.Item
-            name="emailOrPhone"
-            label="Email hoặc Số điện thoại"
-            rules={[{ required: true, message: "Vui lòng nhập email hoặc số điện thoại!" }]}
+            name="emailOrUserNameOrPhone"
+            label="Email, Tên đăng nhập hoặc Số điện thoại"
+            rules={[{ required: true, message: "Vui lòng nhập email, tên đăng nhập hoặc số điện thoại!" }]}
           >
             <Input
-              placeholder="Nhập email hoặc số điện thoại"
+              placeholder="Nhập email, tên đăng nhập hoặc số điện thoại"
               allowClear
               maxLength={100}
               style={{

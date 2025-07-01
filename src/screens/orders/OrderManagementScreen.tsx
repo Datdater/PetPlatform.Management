@@ -76,8 +76,8 @@ const OrderManagementScreen = () => {
         }
     };
 
-    const handleDeliveryClick = (order: Order) => {
-        setSelectedOrder(order);
+    const handleDeliveryClick = (order: IOrder) => {
+        setSelectedOrder(mapIOrderToOrder(order));
         setIsDeliveryModalVisible(true);
     };
 
@@ -119,8 +119,8 @@ const OrderManagementScreen = () => {
         updateOrderStatusMutation.mutate({ orderId, status: 4 }); // Shipped = 4
     };
 
-    const handleViewDetails = (order: Order) => {
-        setSelectedOrder(order);
+    const handleViewDetails = (order: IOrder) => {
+        setSelectedOrder(mapIOrderToOrder(order));
         setShowDetail(true);
     };
 
@@ -146,6 +146,28 @@ const OrderManagementScreen = () => {
     const orders = ordersData?.items || [];
     const totalItems = ordersData?.totalItemsCount || 0;
 
+    // Helper: Convert IOrder to UI Order
+    const mapIOrderToOrder = (order: IOrder): Order => ({
+        id: order.id,
+        customerInfo: {
+            name: '', // backend chưa trả về, cần bổ sung nếu có
+            phone: '',
+            address: '',
+        },
+        products: order.orderDetailDTOs.map((d) => ({
+            name: d.productName,
+            quantity: d.quantity,
+            price: d.price,
+            image: d.pictureUrl,
+        })),
+        totalAmount: order.price,
+        status: order.orderStatus,
+        orderDate: order.createdTime,
+        paymentMethod: '', // backend chưa trả về
+        note: '', // backend chưa trả về
+        pickupTime: '', // backend chưa trả về
+    });
+
     const baseColumns: TableProps<IOrder>['columns'] = [
         {
             title: 'Mã đơn hàng',
@@ -162,7 +184,7 @@ const OrderManagementScreen = () => {
             render: (details: IOrder['orderDetailDTOs']) => (
                 <div>
                     {details.map((detail) => (
-                        <div key={detail.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                        <div key={detail.productId} style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
                             <img src={detail.pictureUrl} alt={detail.productName} style={{ width: 40, height: 40, marginRight: 8, objectFit: 'cover', borderRadius: 8, border: '1px solid #eee' }} />
                             <div>
                                 <div style={{ fontWeight: 600 }}>{detail.productName}</div>
@@ -209,11 +231,9 @@ const OrderManagementScreen = () => {
             render: (_: any, record: IOrder) => {
                 const menu = (
                     <Menu>
-                        {record.orderStatus === 'Pending' && <Menu.Item key="confirm" onClick={() => handleConfirmOrder(record.id)}>Xác nhận</Menu.Item>}
+                        {record.orderStatus === 'PendingPayment' && <Menu.Item key="confirm" onClick={() => handleConfirmOrder(record.id)}>Xác nhận</Menu.Item>}
                         {record.orderStatus === 'Confirmed' && <Menu.Item key="prepare" onClick={() => handlePrepareOrder(record.id)}>Chuẩn bị hàng</Menu.Item>}
-                        {record.orderStatus === 'Processing' && <Menu.Item key="delivery" onClick={() => handleDeliveryClick(record as Order)}>Giao hàng</Menu.Item>}
-                        {record.orderStatus === 'Shipped' && <Menu.Item key="done" onClick={() => handleShipOrder(record.id)}>Hoàn thành</Menu.Item>}
-                        <Menu.Item key="detail" onClick={() => handleViewDetails(record as Order)}>Xem chi tiết</Menu.Item>
+                        <Menu.Item key="detail" onClick={() => handleViewDetails(record)}>Xem chi tiết</Menu.Item>
                     </Menu>
                 );
                 return (
@@ -230,15 +250,16 @@ const OrderManagementScreen = () => {
     const columns = useMemo(() => baseColumns.filter(col => !col.responsive || screens[col.responsive[0]]), [screens]);
 
     const expandedRowRender = (record: IOrder) => {
+        const order = mapIOrderToOrder(record);
         return (
             <Card title="Thông tin đơn hàng" size="small">
                 <Space direction="vertical">
-                    <Text><i className="ri-user-line" style={{ marginRight: 8 }}></i>Khách hàng: {record.customerInfo?.name || 'N/A'}</Text>
-                    <Text><i className="ri-phone-line" style={{ marginRight: 8 }}></i>SĐT: {record.customerInfo?.phone || 'N/A'}</Text>
-                    <Text><i className="ri-map-pin-line" style={{ marginRight: 8 }}></i>Địa chỉ: {record.customerInfo?.address || 'N/A'}</Text>
-                    <Text><b>Ngày đặt:</b> {dayjs(record.createdTime).format('DD/MM/YYYY HH:mm')}</Text>
-                    <Text><b>Tổng tiền:</b> {record.price.toLocaleString('vi-VN')} VND</Text>
-                    {record.note && <Text><b>Ghi chú:</b> {record.note}</Text>}
+                    <Text><i className="ri-user-line" style={{ marginRight: 8 }}></i>Khách hàng: {order.customerInfo?.name || 'N/A'}</Text>
+                    <Text><i className="ri-phone-line" style={{ marginRight: 8 }}></i>SĐT: {order.customerInfo?.phone || 'N/A'}</Text>
+                    <Text><i className="ri-map-pin-line" style={{ marginRight: 8 }}></i>Địa chỉ: {order.customerInfo?.address || 'N/A'}</Text>
+                    <Text><b>Ngày đặt:</b> {dayjs(order.orderDate).format('DD/MM/YYYY HH:mm')}</Text>
+                    <Text><b>Tổng tiền:</b> {order.totalAmount.toLocaleString('vi-VN')} VND</Text>
+                    {order.note && <Text><b>Ghi chú:</b> {order.note}</Text>}
                 </Space>
             </Card>
         );
@@ -287,7 +308,7 @@ const OrderManagementScreen = () => {
     });
 
     if (showDetail && selectedOrder) {
-        return <OrderDetailScreen order={selectedOrder} />;
+        return <OrderDetailScreen order={selectedOrder} onBack={() => setShowDetail(false)} />;
     }
 
     return (

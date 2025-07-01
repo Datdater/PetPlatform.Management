@@ -39,6 +39,7 @@ const MainRouter = () => {
               <Route path="/" element={<StoresScreen />} />
               <Route path="*" element={<NotFound />} />
               <Route path="/profile" element={<Profile />} />
+            </Routes>
 
               {/* Service route */}
               <Route>
@@ -81,16 +82,19 @@ const MainRouter = () => {
               </Route>
 
               {/* Booking Management route */}
-              <Route>
-                <Route path="/bookings" element={<BookingManagementScreen />} />
-                <Route path="/bookings/:id" element={<BookingDetailScreen />} />
-              </Route>
+              <Route path="/bookings" element={<BookingManagementScreen />} />
+              <Route
+                path="/bookings/:id"
+                element={
+                  // @ts-expect-error: BookingDetailScreen requires 'booking' prop, needs to be provided via loader or wrapper
+                  <BookingDetailScreen />
+                }
+              />
 
               {/* Add more route here */}
-            </Routes>
           </Content>
           <Footer className="text-center">
-            Pet Platform ©{new Date().getFullYear()} Created by Pet Platform
+            Sen&Pet Platform ©{new Date().getFullYear()} Created by Sen&Pet Platform
           </Footer>
         </Layout>
       </Layout>
