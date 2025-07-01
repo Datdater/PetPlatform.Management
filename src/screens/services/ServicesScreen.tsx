@@ -63,10 +63,6 @@ const ServicesScreen = () => {
     document.title = "Service Management";
   }, []);
 
-  if (isLoading) {
-    return <Spin size="large" />;
-  }
-
   if (isError) {
     return <div>Error loading services</div>;
   }
@@ -125,88 +121,90 @@ const ServicesScreen = () => {
           </div>
         </Space>
 
-        <Row gutter={[16, 16]}>
-          {services?.items.map((service) => (
-            <Col xs={24} sm={12} md={8} key={service.id}>
-              <Card
-                hoverable
-                cover={
-                  <Image
-                    alt={service.name}
-                    src={service.image || "https://via.placeholder.com/300x200"}
-                    style={{ height: 200, objectFit: 'cover' }}
-                  />
-                }
-                actions={[
-                  <AiTwotoneEye
-                    key="view"
-                    size={20}
-                    onClick={() => handleView(service.id)}
-                  />,
-                ]}
-              >
-                <Card.Meta
-                  title={service.name}
-                  description={
-                    <Space direction="vertical" size="small">
-                      <div>
-                        <Tag color="green">{service.storeName}</Tag>
-                        <Tag color="blue">{service.categoryName}</Tag>
-                      </div>
-                      <div>
-                        <Typography.Text type="secondary">
-                          {service.description}
-                        </Typography.Text>
-                      </div>
-                      <div>
-                        <Typography.Text strong>
-                          Thời gian ước tính: {service.estimatedTime}
-                        </Typography.Text>
-                      </div>
-                      <div>
-                        <Rate disabled defaultValue={service.ratingAverage} style={{ fontSize: 14 }} />
-                        <Typography.Text type="secondary" style={{ marginLeft: 8 }}>
-                          ({service.totalReviews} đánh giá)
-                        </Typography.Text>
-                      </div>
-                      <div>
-                        <Typography.Text type="secondary">
-                          Số lần sử dụng: {service.totalUsed}
-                        </Typography.Text>
-                      </div>
-                      <div>
-                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                          {service.storeAddress}
-                        </Typography.Text>
-                      </div>
-                      <div>
-                        <Tag color={service.status ? "green" : "volcano"}>
-                          {service.status ? "Hoạt động" : "Không hoạt động"}
-                        </Tag>
-                      </div>
-                    </Space>
+        <Spin spinning={isLoading}>
+          <Row gutter={[16, 16]}>
+            {services?.items.map((service) => (
+              <Col xs={24} sm={12} md={8} key={service.id}>
+                <Card
+                  hoverable
+                  cover={
+                    <Image
+                      alt={service.name}
+                      src={service.image || "https://via.placeholder.com/300x200"}
+                      style={{ height: 200, objectFit: 'cover' }}
+                    />
                   }
-                />
-              </Card>
-            </Col>
-          ))}
-        </Row>
+                  actions={[
+                    <AiTwotoneEye
+                      key="view"
+                      size={20}
+                      onClick={() => handleView(service.id)}
+                    />,
+                  ]}
+                >
+                  <Card.Meta
+                    title={service.name}
+                    description={
+                      <Space direction="vertical" size="small">
+                        <div>
+                          <Tag color="green">{service.storeName}</Tag>
+                          <Tag color="blue">{service.categoryName}</Tag>
+                        </div>
+                        <div>
+                          <Typography.Text type="secondary">
+                            {service.description}
+                          </Typography.Text>
+                        </div>
+                        <div>
+                          <Typography.Text strong>
+                            Thời gian ước tính: {service.estimatedTime}
+                          </Typography.Text>
+                        </div>
+                        <div>
+                          <Rate disabled defaultValue={service.ratingAverage} style={{ fontSize: 14 }} />
+                          <Typography.Text type="secondary" style={{ marginLeft: 8 }}>
+                            ({service.totalReviews} đánh giá)
+                          </Typography.Text>
+                        </div>
+                        <div>
+                          <Typography.Text type="secondary">
+                            Số lần sử dụng: {service.totalUsed}
+                          </Typography.Text>
+                        </div>
+                        <div>
+                          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                            {service.storeAddress}
+                          </Typography.Text>
+                        </div>
+                        <div>
+                          <Tag color={service.status ? "green" : "volcano"}>
+                            {service.status ? "Hoạt động" : "Không hoạt động"}
+                          </Tag>
+                        </div>
+                      </Space>
+                    }
+                  />
+                </Card>
+              </Col>
+            ))}
+          </Row>
 
-        <div style={{ marginTop: 20, textAlign: 'center' }}>
-          <Button
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            style={{ marginRight: 8 }}
-          >
-            Trang trước
-          </Button>
-          <Button
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage * pageSize >= (services?.totalItemsCount || 0)}
-          >
-            Trang sau
-          </Button>
-        </div>
+          <div style={{ marginTop: 20, textAlign: 'center' }}>
+            <Button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              style={{ marginRight: 8 }}
+            >
+              Trang trước
+            </Button>
+            <Button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage * pageSize >= (services?.totalItemsCount || 0)}
+            >
+              Trang sau
+            </Button>
+          </div>
+        </Spin>
       </div>
     </Space>
   );

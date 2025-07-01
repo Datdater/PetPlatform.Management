@@ -13,7 +13,7 @@ import ProductsScreen from "../screens/product/ProductsScreen.tsx";
 import AddProductScreen from "../screens/product/AddProductScreen.tsx";
 import ProductDetailScreen from "../screens/product/ProductDetailScreen.tsx";
 import Profile from "../screens/auth/Profile.tsx";
-import Calendar from "../pages/calendar";
+import CalendarScreen from "../screens/calendar/CalendarScreen.tsx";
 import OrderManagementScreen from "../screens/orders/OrderManagementScreen.tsx";
 import BookingManagementScreen from "../screens/bookings/BookingManagementScreen.tsx";
 import BookingDetailScreen from "../screens/bookings/BookingDetailScreen.tsx";
@@ -72,7 +72,7 @@ const MainRouter = () => {
 
               {/* Calendar route */}
               <Route>
-                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/calendar" element={<CalendarScreen />} />
               </Route>
 
               {/* Order Management route */}

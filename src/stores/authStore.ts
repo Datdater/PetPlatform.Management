@@ -14,12 +14,13 @@ export const useAuthStore = create<AuthStore>()(
     (set, get) => ({
       user: null,
       token: null,
+      refreshToken: null,
       error: null,
 
       // Add a method to safely get the token
       getToken: () => get().token,
 
-      setAuth: (user, token) => set({ user, token, error: null }),
+      setAuth: (user, token, refreshToken) => set({ user, token, refreshToken, error: null }),
 
       register: async (email, password, name, phone) => {
         try {
@@ -61,12 +62,12 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
-      login: async (emailOrPhone, password) => {
+      login: async (emailOrUserNameOrPhone, password) => {
         try {
           const response = await fetch(`${authAPI}/Auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ emailOrPhone, password }),
+            body: JSON.stringify({ emailOrUserNameOrPhone, password }),
           });
 
           const data = await response.json();
@@ -87,6 +88,7 @@ export const useAuthStore = create<AuthStore>()(
 
           set({
             token: data.accessToken,
+            refreshToken: data.refreshToken,
             user: data.user,
             error: null,
           });
@@ -97,6 +99,7 @@ export const useAuthStore = create<AuthStore>()(
               state: {
                 user: data.user,
                 token: data.accessToken,
+                refreshToken: data.refreshToken,
               },
             })
           );
@@ -121,6 +124,7 @@ export const useAuthStore = create<AuthStore>()(
         set({
           user: null,
           token: null,
+          refreshToken: null,
           error: null,
         });
         localStorage.removeItem("auth-storage");

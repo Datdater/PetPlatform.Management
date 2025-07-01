@@ -15,22 +15,26 @@ export interface ProductPrice {
 }
 
 export interface IAddProduct {
-  categoryId: string;
-  storeId: string;
   name: string;
-  description: string;
-  basePrice: number;
+  productDescription: string;
+  productCategoryId: string;
+  brandId: string;
+  storeId: string;
+  isActive: boolean;
   weight: number;
   length: number;
   height: number;
-  variants: {
-    attributes: string;
-    price: number;
-    stock: number;
+  width: number;
+  productImages: { url: string }[];
+  productTypes: {
+    name: string;
+    productTypeDetails: { name: string }[];
   }[];
-  images: {
-    imageUrl: string;
-    isMain: boolean;
+  productPrices: {
+    price: number;
+    inventory: number;
+    productTypeDetails1: string;
+    productTypeDetails2: string;
   }[];
 }
 

@@ -1,13 +1,14 @@
 import { AxiosResponse } from 'axios';
-import { productClient } from './clients';
+import { feClient } from './clients';
 import { IAddProduct, IProduct, IProductDetail, IUpdateProduct } from '../types/IProduct';
 import { IResponse } from '../types/IResponse';
 
 const BASE_URL = '/products';
+const STORE_BASE_URL = '/products/my-store';
 
 // Get all products
 export const getProducts = async (pageNumber: number, pageSize: number): Promise<IResponse<IProduct>> => {
-  const response: AxiosResponse<IResponse<IProduct>> = await productClient.get(BASE_URL, {
+  const response: AxiosResponse<IResponse<IProduct>> = await feClient.get(STORE_BASE_URL, {
     params: {
       pageNumber,
       pageSize
@@ -18,54 +19,54 @@ export const getProducts = async (pageNumber: number, pageSize: number): Promise
 
 // Get a single product by ID
 export const getProductById = async (id: string): Promise<IProductDetail> => {
-  const response: AxiosResponse<IProductDetail> = await productClient.get(`${BASE_URL}/${id}`);
+  const response: AxiosResponse<IProductDetail> = await feClient.get(`${BASE_URL}/${id}`);
   return response.data;
 };
 
 // Add a new product
 export const addProduct = async (product: IAddProduct): Promise<IAddProduct> => {
-  const response: AxiosResponse<IAddProduct> = await productClient.post(BASE_URL, product);
+  const response: AxiosResponse<IAddProduct> = await feClient.post(BASE_URL, product);
   return response.data;
 };
 
 // Update a product
 export const updateProduct = async (id: string, product: IUpdateProduct): Promise<IUpdateProduct> => {
-  const response: AxiosResponse<IUpdateProduct> = await productClient.put(`${BASE_URL}/${id}`, product);
+  const response: AxiosResponse<IUpdateProduct> = await feClient.put(`${BASE_URL}/${id}`, product);
   return response.data;
 };
 
 // Delete a product
 export const deleteProduct = async (id: string): Promise<void> => {
-  await productClient.delete(`${BASE_URL}/${id}`);
+  await feClient.delete(`${BASE_URL}/${id}`);
 };
 
 // Update product status (active/inactive)
 export const updateProductStatus = async (id: string, isActive: boolean): Promise<IAddProduct> => {
-  const response: AxiosResponse<IAddProduct> = await productClient.patch(`${BASE_URL}/${id}/status`, { isActive });
+  const response: AxiosResponse<IAddProduct> = await feClient.patch(`${BASE_URL}/${id}/status`, { isActive });
   return response.data;
 };
 
 // Get products by category
 export const getProductsByCategory = async (categoryId: string): Promise<IAddProduct[]> => {
-  const response: AxiosResponse<IAddProduct[]> = await productClient.get(`${BASE_URL}/category/${categoryId}`);
+  const response: AxiosResponse<IAddProduct[]> = await feClient.get(`${BASE_URL}/category/${categoryId}`);
   return response.data;
 };
 
 // Get products by store
 export const getProductsByStore = async (storeId: string): Promise<IAddProduct[]> => {
-  const response: AxiosResponse<IAddProduct[]> = await productClient.get(`${BASE_URL}/store/${storeId}`);
+  const response: AxiosResponse<IAddProduct[]> = await feClient.get(`${BASE_URL}/store/${storeId}`);
   return response.data;
 };
 
 // Get products by brand
 export const getProductsByBrand = async (brandId: string): Promise<IAddProduct[]> => {
-  const response: AxiosResponse<IAddProduct[]> = await productClient.get(`${BASE_URL}/brand/${brandId}`);
+  const response: AxiosResponse<IAddProduct[]> = await feClient.get(`${BASE_URL}/brand/${brandId}`);
   return response.data;
 };
 
 // Search products
 export const searchProducts = async (query: string): Promise<IAddProduct[]> => {
-  const response: AxiosResponse<IAddProduct[]> = await productClient.get(`${BASE_URL}/search`, {
+  const response: AxiosResponse<IAddProduct[]> = await feClient.get(`${BASE_URL}/search`, {
     params: { q: query }
   });
   return response.data;
@@ -77,7 +78,7 @@ export const updateProductInventory = async (
   priceId: string, 
   inventory: number
 ): Promise<IAddProduct> => {
-  const response: AxiosResponse<IAddProduct> = await productClient.patch(
+  const response: AxiosResponse<IAddProduct> = await feClient.patch(
     `${BASE_URL}/${productId}/prices/${priceId}/inventory`,
     { inventory }
   );
@@ -90,7 +91,7 @@ export const updateProductPrice = async (
   priceId: string,
   price: number
 ): Promise<IAddProduct> => {
-  const response: AxiosResponse<IAddProduct> = await productClient.patch(
+  const response: AxiosResponse<IAddProduct> = await feClient.patch(
     `${BASE_URL}/${productId}/prices/${priceId}/price`,
     { price }
   );
@@ -107,19 +108,19 @@ export const getProductStats = async (productId: string): Promise<{
     totalViews: number;
     totalSales: number;
     averageRating: number;
-  }> = await productClient.get(`${BASE_URL}/${productId}/stats`);
+  }> = await feClient.get(`${BASE_URL}/${productId}/stats`);
   return response.data;
 };
 
 // Bulk update products
 export const bulkUpdateProducts = async (products: IAddProduct[]): Promise<IAddProduct[]> => {
-  const response: AxiosResponse<IAddProduct[]> = await productClient.put(`${BASE_URL}/bulk`, products);
+  const response: AxiosResponse<IAddProduct[]> = await feClient.put(`${BASE_URL}/bulk`, products);
   return response.data;
 };
 
 // Export products
 export const exportProducts = async (format: 'csv' | 'excel'): Promise<Blob> => {
-  const response: AxiosResponse<Blob> = await productClient.get(`${BASE_URL}/export`, {
+  const response: AxiosResponse<Blob> = await feClient.get(`${BASE_URL}/export`, {
     params: { format },
     responseType: 'blob'
   });
@@ -139,7 +140,7 @@ export const importProducts = async (file: File): Promise<{
     success: boolean;
     importedCount: number;
     errors?: string[];
-  }> = await productClient.post(`${BASE_URL}/import`, formData, {
+  }> = await feClient.post(`${BASE_URL}/import`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

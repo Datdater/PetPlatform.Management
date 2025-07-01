@@ -32,7 +32,7 @@ const Routers = () => {
     getData();
   }, [setAuth]);
 
-  return isLoading ? <Spin /> : <MainRouter />;
+  return isLoading ? <Spin /> : token ? <MainRouter /> : <AuthRouter />;
 };
 
 export default Routers;

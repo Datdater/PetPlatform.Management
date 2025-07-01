@@ -26,20 +26,6 @@ const StoreInfoFormItem = (propss: StoreInforFormItemProps) => {
   const [bannerUrlLink, setBannerUrlLink] = useState("");
 
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [addresses, setAddresses] = useState<
-    { value: string; label: string }[]
-  >([]);
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getStoreAddress();
-      const addressOptions = data.map((address) => ({
-        value: address.id,
-        label: address.addressFullPath,
-      }));
-      setAddresses(addressOptions);
-    };
-    fetchData();
-  }, []);
 
   return (
     <div style={{ margin: "0 auto", width: "70%", padding: "40px 0px" }}>
@@ -58,22 +44,6 @@ const StoreInfoFormItem = (propss: StoreInforFormItemProps) => {
         style={{ marginBottom: 20, textAlign: "left" }}
       >
         <Input showCount maxLength={20} placeholder="Nhập tên cửa hàng" />
-      </Form.Item>
-
-      <Form.Item
-        label="Địa chỉ lấy hàng"
-        name="addressId"
-        validateTrigger="onBlur"
-        rules={[
-          { required: true, message: "Địa chỉ lấy hàng không được trống" },
-        ]}
-        style={{ marginBottom: 20, textAlign: "left" }}
-      >
-        <Select
-          showSearch
-          placeholder="Chọn địa chỉ lấy hàng"
-          options={addresses}
-        />
       </Form.Item>
 
       <Form.Item

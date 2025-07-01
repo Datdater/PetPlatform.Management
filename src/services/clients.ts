@@ -16,8 +16,8 @@ const createClient = (baseURL: string) => {
 };
 
 // Create specific clients for different services
-export const productClient = createClient(`${import.meta.env.VITE_BACKEND_URL}`);
-export const serviceClient = createClient(`${import.meta.env.VITE_SERVICE_BACKEND_URL}`);
+export const feClient= createClient(`${import.meta.env.VITE_BACKEND_URL}`);
+
 
 // Export default client for backward compatibility
-export const client = productClient;
+export const client = feClient;

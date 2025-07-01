@@ -1,172 +1,105 @@
-import { Button, Card, Form, Input, message, Typography } from "antd";
+import { Button, Form, Space, Spin, Steps, theme, Typography, message, Grid } from "antd";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import StoreInfoFormItem from "../../components/features/stores/StoreInfoFormItem";
+import StoreFaxFormItem from "../../components/features/stores/StoreFaxFormItem";
+import StoreIdentityFormItem from "../../components/features/stores/StoreIdentityFormItem";
+import StoreAccountFormItem from '../../components/features/stores/StoreAccountFormItem';
+import StoreFinalCheck from "../../components/features/stores/StoreFinalCheck";
+import { useNavigate } from "react-router";
+import { useAddStore } from "../../hooks/store/useAddStore";
 import { useAuthStore } from "../../stores/authStore";
-import { appInfo } from "../../constants/appInfos";
-
-const { Title, Text } = Typography;
 
 const SignUp = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [backendError, setBackendError] = useState<string | null>(null);
+  const { token } = theme.useToken();
+  const [current, setCurrent] = useState(0);
+  const { mutate, isPending } = useAddStore();
+  const { login } = useAuthStore();
+  const [formValues, setFormValues] = useState({});
   const [form] = Form.useForm();
   const navigate = useNavigate();
-  const { register } = useAuthStore();
+  const { useBreakpoint } = Grid;
+  const screens = useBreakpoint();
 
-  const handleSignUp = async (values: {
-    name: string;
-    email: string;
-    password: string;
-    phone: string;
-  }) => {
-    setIsLoading(true);
+  const steps = [
+    { title: "Thông tin cửa hàng", content: <StoreInfoFormItem form={form} /> },
+    { title: "Thông tin thuế", content: <StoreFaxFormItem /> },
+    { title: "Thông tin định danh", content: <StoreIdentityFormItem form={form} /> },
+    { title: "Thông tin đăng nhập", content: <StoreAccountFormItem /> },
+    { title: "Hoàn tất", content: <StoreFinalCheck /> },
+  ];
+  const isVertical = !screens.md || steps.length > 4;
 
-    try {
-      const result = await register(
-        values.email,
-        values.password,
-        values.name,
-        values.phone
-      );
+  const next = () => setCurrent((c) => c + 1);
+  const prev = () => setCurrent((c) => c - 1);
 
-      if (result.success) {
-        message.success("Sign-up successful! Redirecting to login...");
-        navigate("/");
-      } else {
-        // Display the specific error message
-        setBackendError(result.error || "Sign-up failed");
-        message.error(result.error || "Sign-up failed");
-      }
-    } catch (error) {
-      message.error("An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
-    }
+  const handleNext = () => {
+    form.validateFields().then(() => {
+      setFormValues((old) => ({ ...old, ...form.getFieldsValue() }));
+      next();
+    });
   };
+
+  const handleFinish = async (values: any) => {
+    mutate(
+      { ...values, ...formValues },
+      {
+        onSuccess: async () => {
+          message.success("Tạo cửa hàng thành công! Đang tự động đăng nhập...");
+          const loginResult = await login(values.username, values.password);
+          if (loginResult.success) {
+            message.success("Đăng nhập thành công!");
+            navigate("/", { replace: true });
+          } else {
+            message.error(loginResult.error || "Đăng nhập tự động thất bại. Vui lòng đăng nhập thủ công.");
+            navigate("/", { replace: true });
+          }
+        },
+        onError: () => message.error("Tạo cửa hàng thất bại!"),
+      }
+    );
+  };
+
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        backgroundColor: "#f4f4f4",
-        padding: 20,
-      }}
-    >
-      <Card
-        style={{
-          width: "100%",
-          maxWidth: 400,
-          padding: 24,
-          borderRadius: 12,
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-          backgroundColor: "#fff",
-        }}
-      >
-        <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <img
-            src={appInfo.logo}
-            alt="Logo"
-            style={{ width: 48, height: 48, marginBottom: 8 }}
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f4f4f4' }}>
+      <div style={{ width: '100%', maxWidth: 1200, background: '#fff', borderRadius: 10, padding: 16, boxShadow: '0 0 10px #eee' }}>
+        <Space style={{ width: '100%' }} direction="vertical">
+          <Typography style={{ fontSize: 24, fontWeight: 600, marginTop: 8, textAlign: 'center' }}>Tạo cửa hàng mới</Typography>
+          <Steps
+            current={current}
+            items={steps.map((s) => ({ key: s.title, title: s.title }))}
+            direction="horizontal"
+            style={{ marginBottom: 12, maxWidth: '100%', margin: '0 auto', fontSize: 14 }}
+            responsive
           />
-          <Title level={3} style={{ fontWeight: 600, color: "#333" }}>
-            Create an account
-          </Title>
-          <Text type="secondary">Start your 30-day free trial today.</Text>
-        </div>
-
-        {backendError && (
-          <div
-            style={{
-              color: "red",
-              backgroundColor: "#ffecec",
-              padding: "10px",
-              borderRadius: "4px",
-              marginBottom: "16px",
-              textAlign: "center",
-            }}
-          >
-            {backendError}
-          </div>
-        )}
-
-        <Form
-          layout="vertical"
-          form={form}
-          onFinish={handleSignUp}
-          size="large"
-        >
-          <Form.Item
-            name="name"
-            label="Username"
-            rules={[{ required: true, message: "Please enter your username!" }]}
-          >
-            <Input placeholder="Enter your full name" allowClear />
-          </Form.Item>
-
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[{ required: true, message: "Please enter your email!" }]}
-          >
-            <Input
-              placeholder="Enter your email"
-              allowClear
-              maxLength={100}
-              type="email"
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[
-              { required: true, message: "Please enter your password!" },
-              {
-                min: 6,
-                message: "Password must be at least 6 characters long!",
-              },
-            ]}
-          >
-            <Input.Password placeholder="Create password" maxLength={100} />
-          </Form.Item>
-
-          <Form.Item
-            name="phone"
-            label="Phone Number"
-            rules={[
-              { required: true, message: "Please enter your phone number!" },
-            ]}
-          >
-            <Input placeholder="Enter your phone number" allowClear />
-          </Form.Item>
-
-          <Button
-            loading={isLoading}
-            type="primary"
-            htmlType="submit"
-            style={{
-              width: "100%",
-              borderRadius: 6,
-              fontWeight: 600,
-              height: 45,
-            }}
-          >
-            Sign up
-          </Button>
-
-          <div style={{ textAlign: "center", marginTop: 16 }}>
-            <Text type="secondary">Already have an account?</Text>
-            <Link
-              to="/"
-              style={{ marginLeft: 6, color: "#1890ff", fontWeight: 500 }}
+          <Spin spinning={isPending}>
+            <Form
+              form={form}
+              layout="horizontal"
+              labelCol={{ span: 7 }}
+              wrapperCol={{ span: 15 }}
+              onFinish={handleFinish}
             >
-              Log in
-            </Link>
+              <div style={{ margin: '12px 0', borderRadius: 8, border: '1px dashed #eee', padding: 12, background: '#fafbfc' }}>
+                {steps[current].content}
+              </div>
+            </Form>
+          </Spin>
+          <div style={{ textAlign: 'center', marginTop: 8 }}>
+            {current > 0 && current < steps.length - 1 && (
+              <Button style={{ marginRight: 8 }} onClick={prev}>Quay lại</Button>
+            )}
+            {current < steps.length - 2 && (
+              <Button type="primary" onClick={handleNext}>Tiếp tục</Button>
+            )}
+            {current === steps.length - 2 && (
+              <Button type="primary" loading={isPending} onClick={() => form.submit()}>Hoàn tất</Button>
+            )}
+            {current === steps.length - 1 && (
+              <Button type="primary" onClick={() => navigate("/", { replace: true })}>Về trang chủ</Button>
+            )}
           </div>
-        </Form>
-      </Card>
+        </Space>
+      </div>
     </div>
   );
 };

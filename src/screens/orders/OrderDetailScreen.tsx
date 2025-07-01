@@ -1,5 +1,5 @@
-import { Typography, Card, Space, Flex, Table, Tag, Divider } from 'antd';
-import { UserOutlined, PhoneOutlined, EnvironmentOutlined, CarryOutOutlined, SolutionOutlined } from '@ant-design/icons';
+import { Typography, Card, Space, Flex, Table, Tag, Divider, Button } from 'antd';
+import { UserOutlined, PhoneOutlined, EnvironmentOutlined, CarryOutOutlined, SolutionOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 
@@ -25,9 +25,10 @@ interface OrderDetailProps {
         paymentMethod: string;
         note?: string;
     };
+    onBack: () => void;
 }
 
-const OrderDetailScreen: React.FC<OrderDetailProps> = ({ order }) => {
+const OrderDetailScreen: React.FC<OrderDetailProps> = ({ order, onBack }) => {
 
     // Placeholder columns for product list within payment info
     const productColumns = [
@@ -63,7 +64,12 @@ const OrderDetailScreen: React.FC<OrderDetailProps> = ({ order }) => {
 
     return (
         <div style={{ padding: '20px' }}>
-            <Title level={2}>Chi Tiết Đơn Hàng #{order.id}</Title>
+            <Flex align="center" gap="middle" style={{ marginBottom: 16 }}>
+                <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
+                    Quay lại
+                </Button>
+                <Title level={2} style={{ margin: 0 }}>Chi Tiết Đơn Hàng #{order.id}</Title>
+            </Flex>
 
             {/* Status Section */}
             <Card style={{ marginBottom: 20, boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)" }}>

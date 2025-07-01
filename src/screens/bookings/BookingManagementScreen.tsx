@@ -1,12 +1,15 @@
-import { Typography, Tabs, Table, DatePicker, Input, Button, Space, Flex, Card, Tag, Modal, Form } from 'antd';
-import { useState } from 'react';
+import { Typography, Tabs, Table, DatePicker, Input, Button, Space, Flex, Card, Tag, Modal, Form, Spin, Grid, Dropdown, Menu } from 'antd';
+import { useEffect, useState } from 'react';
 import type { TabsProps, TableProps } from 'antd';
 import dayjs from 'dayjs';
 import BookingDetailScreen from './BookingDetailScreen';
+import { fetchBookings, IBookingItem, IBookingResponse } from '../../services/booking.service';
+import { DownOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
+const { useBreakpoint } = Grid;
 
 interface Booking {
     id: string;
@@ -36,128 +39,60 @@ interface Booking {
 }
 
 const BookingManagementScreen = () => {
+    const screens = useBreakpoint();
     const [activeTab, setActiveTab] = useState('all');
-    const [bookings, setBookings] = useState<Booking[]>([]); // Placeholder for booking data
+    const [bookings, setBookings] = useState<IBookingItem[]>([]);
     const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
-    const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+    const [selectedBooking, setSelectedBooking] = useState<IBookingItem | null>(null);
     const [form] = Form.useForm();
     const [showDetail, setShowDetail] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [totalCount, setTotalCount] = useState(0);
 
-    // Placeholder data
-    const dummyBookings: Booking[] = [
-        {
-            id: 'BK001',
-            customerInfo: {
-                name: 'Nguyễn Văn A',
-                phone: '0123456789',
-                address: '123 Đường ABC, Quận XYZ, TP.HCM',
-            },
-            service: {
-                name: 'Tắm rửa và cắt tỉa lông',
-                price: 200000,
-                duration: '2 giờ',
-                image: 'placeholder.jpg',
-            },
-            petInfo: {
-                name: 'Lucky',
-                type: 'Chó',
-                breed: 'Poodle',
-                age: 2,
-            },
-            totalAmount: 200000,
-            status: 'Chờ xác nhận',
-            bookingDate: '2024-03-20',
-            bookingTime: '14:00',
-            paymentMethod: 'Thanh toán khi nhận dịch vụ',
-            note: 'Chó của tôi hơi nhát, mong được chăm sóc nhẹ nhàng'
-        },
-        {
-            id: 'BK002',
-            customerInfo: {
-                name: 'Trần Thị B',
-                phone: '0987654321',
-                address: '456 Đường DEF, Quận UVW, TP.HCM',
-            },
-            service: {
-                name: 'Khám sức khỏe tổng quát',
-                price: 500000,
-                duration: '1 giờ',
-                image: 'placeholder.jpg',
-            },
-            petInfo: {
-                name: 'Milo',
-                type: 'Mèo',
-                breed: 'British Shorthair',
-                age: 1,
-            },
-            totalAmount: 500000,
-            status: 'Đã xác nhận',
-            bookingDate: '2024-03-21',
-            bookingTime: '10:00',
-            paymentMethod: 'Đã thanh toán online',
-        }
-    ];
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const res = await fetchBookings('3fa85f64-5717-4562-b3fc-2c963f66afa6', 1, 10);
+                setBookings(res.items);
+                setTotalCount(res.totalItemsCount);
+            } catch (e) {
+                setBookings([]);
+            }
+            setIsLoading(false);
+        };
+        fetchData();
+    }, []);
 
-    const handleConfirmBooking = (bookingId: string) => {
-        setBookings(prevBookings => 
-            prevBookings.map(booking => 
-                booking.id === bookingId 
-                    ? { ...booking, status: 'Đã xác nhận' }
-                    : booking
-            )
-        );
-    };
-
-    const handleCompleteBooking = (bookingId: string) => {
-        setBookings(prevBookings => 
-            prevBookings.map(booking => 
-                booking.id === bookingId 
-                    ? { ...booking, status: 'Hoàn thành' }
-                    : booking
-            )
-        );
-    };
-
-    const handleViewDetails = (booking: Booking) => {
+    const handleViewDetails = (booking: IBookingItem) => {
         setSelectedBooking(booking);
         setShowDetail(true);
     };
 
-    // Define table columns
-    const columns: TableProps<Booking>['columns'] = [
+    const baseColumns: TableProps<IBookingItem>['columns'] = [
         {
             title: 'Mã đặt lịch',
-            dataIndex: 'id',
-            key: 'id',
-            width: 120,
-            fixed: 'left',
+            dataIndex: 'bookingId',
+            key: 'bookingId',
+            width: 100,
+            fixed: screens.md ? 'left' : undefined,
         },
         {
-            title: 'Dịch vụ',
-            dataIndex: 'service',
-            key: 'service',
+            title: 'Thú cưng & Dịch vụ',
+            dataIndex: 'petWithServices',
+            key: 'petWithServices',
             width: 250,
-            render: (service: { name: string; price: number; duration: string; image: string }) => (
-                <Space direction="vertical">
-                    <Flex align="center">
-                        <img src={service.image} alt={service.name} style={{ width: 50, marginRight: 10 }} />
-                        <Text>{service.name}</Text>
-                    </Flex>
-                    <Text type="secondary">Thời gian: {service.duration}</Text>
-                </Space>
-            ),
-        },
-        {
-            title: 'Thú cưng',
-            dataIndex: 'petInfo',
-            key: 'petInfo',
-            width: 200,
-            render: (petInfo: { name: string; type: string; breed: string; age: number }) => (
-                <Space direction="vertical">
-                    <Text>{petInfo.name}</Text>
-                    <Text type="secondary">{petInfo.type} - {petInfo.breed}</Text>
-                    <Text type="secondary">Tuổi: {petInfo.age} tuổi</Text>
-                </Space>
+            render: (petWithServices: IBookingItem['petWithServices']) => (
+                <div>
+                    {petWithServices.map((pws, idx) => (
+                        <div key={idx} style={{ marginBottom: 4 }}>
+                            <b>{pws.pet.name}</b> ({pws.pet.petType ? 'Chó' : 'Mèo'} - {pws.pet.color})<br />
+                            {pws.services.map(s => (
+                                <Tag key={s.id} style={{ marginTop: 2, marginBottom: 2 }}>{s.serviceDetailName}</Tag>
+                            ))}
+                        </div>
+                    ))}
+                </div>
             ),
         },
         {
@@ -165,83 +100,68 @@ const BookingManagementScreen = () => {
             dataIndex: 'bookingTime',
             key: 'bookingTime',
             width: 150,
-            render: (time: string, record: Booking) => (
-                <Space direction="vertical">
-                    <Text>{record.bookingDate}</Text>
-                    <Text type="secondary">{time}</Text>
-                </Space>
+            responsive: ['sm'],
+            render: (bookingTime: string) => (
+                <span>{new Date(bookingTime).toLocaleString('vi-VN')}</span>
             ),
         },
         {
-            title: 'Tổng tiền',
-            dataIndex: 'totalAmount',
-            key: 'totalAmount',
-            width: 150,
-            render: (amount: number, record: Booking) => (
-                <Space direction="vertical">
-                    <Text>{amount.toLocaleString('vi-VN')}VND</Text>
-                    <Text type="secondary" style={{ fontSize: '12px' }}>{record.paymentMethod}</Text>
-                </Space>
+            title: 'Tổng tiền (VND)',
+            dataIndex: 'totalPrice',
+            key: 'totalPrice',
+            width: 120,
+            responsive: ['md'],
+            align: 'right',
+            render: (totalPrice: number) => (
+                <span>{totalPrice.toLocaleString('vi-VN')}</span>
             ),
         },
         {
             title: 'Trạng thái',
             dataIndex: 'status',
             key: 'status',
-            width: 150,
-            render: (status: string) => {
+            width: 120,
+            render: (status: number) => {
                 let color = 'geekblue';
-                if (status === 'Chờ xác nhận') {
-                    color = 'volcano';
-                } else if (status === 'Đã xác nhận') {
-                    color = 'blue';
-                } else if (status === 'Hoàn thành') {
-                    color = 'green';
-                }
-                return <Tag color={color}>{status.toUpperCase()}</Tag>;
+                let text = 'Khác';
+                if (status === 1) { color = 'volcano'; text = 'Đã đặt'; }
+                else if (status === 2) { color = 'blue'; text = 'Đang thực hiện'; }
+                else if (status === 3) { color = 'green'; text = 'Hoàn thành'; }
+                else if (status === 4) { color = 'red'; text = 'Đã hủy'; }
+                return <Tag color={color}>{text}</Tag>;
             },
-        },
-        {
-            title: 'Ghi chú',
-            dataIndex: 'note',
-            key: 'note',
-            width: 200,
-            render: (note: string) => (
-                <Text style={{ wordBreak: 'break-word' }}>{note || '-'}</Text>
-            ),
         },
         {
             title: 'Thao tác',
             key: 'action',
-            width: 150,
-            fixed: 'right',
-            render: (_: any, record: Booking) => (
-                <Space direction="vertical" size="small">
-                    {record.status === 'Chờ xác nhận' && (
-                        <Button type="link" onClick={() => handleConfirmBooking(record.id)}>
-                            Xác nhận lịch hẹn
+            width: 100,
+            fixed: screens.md ? 'right' : undefined,
+            align: 'center',
+            render: (_: any, record: IBookingItem) => {
+                const menu = (
+                    <Menu>
+                        <Menu.Item key="detail" onClick={() => handleViewDetails(record)}>Xem chi tiết</Menu.Item>
+                    </Menu>
+                );
+                return (
+                    <Dropdown overlay={menu} trigger={["click"]}>
+                        <Button size="small">
+                            Thao tác <DownOutlined />
                         </Button>
-                    )}
-                    {record.status === 'Đã xác nhận' && (
-                        <Button type="link" onClick={() => handleCompleteBooking(record.id)}>
-                            Hoàn thành
-                        </Button>
-                    )}
-                    <Button type="link" onClick={() => handleViewDetails(record)}>
-                        Xem chi tiết
-                    </Button>
-                </Space>
-            ),
+                    </Dropdown>
+                );
+            },
         },
     ];
 
-    const expandedRowRender = (record: Booking) => {
+    const columns = baseColumns.filter(col => !col.responsive || screens[col.responsive[0]]);
+
+    const expandedRowRender = (record: IBookingItem) => {
         return (
             <Card title="Thông tin khách hàng" size="small">
                 <Space direction="vertical">
-                    <Text><i className="ri-user-line" style={{ marginRight: 8 }}></i>Khách hàng: {record.customerInfo.name}</Text>
-                    <Text><i className="ri-phone-line" style={{ marginRight: 8 }}></i>SĐT: {record.customerInfo.phone}</Text>
-                    <Text><i className="ri-map-pin-line" style={{ marginRight: 8 }}></i>Địa chỉ: {record.customerInfo.address}</Text>
+                    <Text><i className="ri-user-line" style={{ marginRight: 8 }}></i>Khách hàng: {record.userName}</Text>
+                    <Text><i className="ri-phone-line" style={{ marginRight: 8 }}></i>SĐT: {record.userPhone}</Text>
                 </Space>
             </Card>
         );
@@ -260,36 +180,40 @@ const BookingManagementScreen = () => {
         // TODO: Fetch bookings based on the selected tab key
     };
 
-    // Load dummy data on component mount
-    useState(() => {
-        setBookings(dummyBookings);
+    const filteredData = bookings.filter(booking => {
+        if (activeTab === 'all') return true;
+        // ... (filtering logic)
     });
 
-    // Add a back button or similar if you navigate to detail view
     if (showDetail && selectedBooking) {
         return <BookingDetailScreen booking={selectedBooking} />;
     }
 
     return (
-        <div style={{ padding: '20px' }}>
-            <Title level={2}>Quản Lý Đặt Lịch</Title>
-            <Card style={{ marginTop: 20, boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)" }}>
-                <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
-                    <Text strong>Danh Sách Đặt Lịch</Text>
-                    <Space>
+        <div style={{ padding: screens.md ? '24px' : '12px' }}>
+            <Title level={2}>Quản lý đặt lịch</Title>
+            <Card style={{ marginBottom: 24 }}>
+                <Flex justify="space-between" align="center" wrap="wrap" gap="middle">
+                    <Space wrap>
                         <RangePicker />
+                        <Input.Search placeholder="Tìm kiếm" style={{ width: 200 }} />
                     </Space>
+                    <Text>Tổng cộng: {totalCount} đặt lịch</Text>
                 </Flex>
-                <Tabs activeKey={activeTab} items={tabItems} onChange={handleTabChange} />
+            </Card>
+
+            <Tabs defaultActiveKey="all" items={tabItems} onChange={handleTabChange} />
+
+            <Spin spinning={isLoading}>
                 <Table
                     columns={columns}
                     dataSource={bookings}
-                    rowKey="id"
+                    rowKey="bookingId"
+                    scroll={{ x: 'max-content' }}
                     expandable={{ expandedRowRender }}
-                    pagination={false}
-                    scroll={{ x: 1500 }}
+                    pagination={{ pageSize: 10 }}
                 />
-            </Card>
+            </Spin>
         </div>
     );
 };

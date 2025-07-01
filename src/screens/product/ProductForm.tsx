@@ -1,7 +1,8 @@
-import React from 'react';
-import { Form, Input, Switch, Select, Button, Space, InputNumber, Upload } from 'antd';
+import React, { useState } from 'react';
+import { Form, Input, Switch, Select, Button, Space, InputNumber, Upload, message } from 'antd';
 import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons';
 import { IAddProduct } from '../../types/IProduct';
+import type { UploadFile, UploadProps } from 'antd';
 
 interface ProductFormProps {
   onSubmit: (values: IAddProduct) => void;
@@ -19,12 +20,109 @@ const ProductForm: React.FC<ProductFormProps> = ({
   stores,
 }) => {
   const [form] = Form.useForm();
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [uploading, setUploading] = useState(false);
+
+  // Custom upload function
+  const handleUpload = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('https://localhost:7000/api/image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+      return result.url || result.data?.url; // Adjust based on your API response
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw error;
+    }
+  };
+
+  // Upload props for Ant Design Upload
+  const uploadProps: UploadProps = {
+    name: 'file',
+    multiple: true,
+    fileList,
+    beforeUpload: (file) => {
+      // Validate file type
+      const isImage = file.type.startsWith('image/');
+      if (!isImage) {
+        message.error('You can only upload image files!');
+        return false;
+      }
+
+      // Validate file size (e.g., max 5MB)
+      const isLt5M = file.size / 1024 / 1024 < 5;
+      if (!isLt5M) {
+        message.error('Image must smaller than 5MB!');
+        return false;
+      }
+
+      return false; // Prevent auto upload, we'll handle it manually
+    },
+    onChange: (info) => {
+      setFileList(info.fileList);
+    },
+    onRemove: (file) => {
+      const index = fileList.indexOf(file);
+      const newFileList = fileList.slice();
+      newFileList.splice(index, 1);
+      setFileList(newFileList);
+    },
+  };
+
+  // Handle form submission with file upload
+  const handleSubmit = async (values: any) => {
+    try {
+      setUploading(true);
+      
+      // Upload all files first
+      const uploadedUrls: string[] = [];
+      
+      for (const file of fileList) {
+        if (file.originFileObj) {
+          const url = await handleUpload(file.originFileObj as File);
+          uploadedUrls.push(url);
+        }
+      }
+
+      // Add uploaded URLs to product images
+      const productImages = uploadedUrls.map(url => ({ url }));
+      
+      // Merge with existing product images from form
+      const existingImages = values.productImages || [];
+      const allImages = [...existingImages, ...productImages];
+
+      // Submit form with uploaded image URLs
+      onSubmit({
+        ...values,
+        productImages: allImages
+      });
+
+      message.success('Product created successfully!');
+      form.resetFields();
+      setFileList([]);
+    } catch (error) {
+      message.error('Failed to upload files or create product');
+      console.error('Submit error:', error);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <Form
       form={form}
       layout="vertical"
-      onFinish={onSubmit}
+      onFinish={handleSubmit}
       initialValues={initialValues}
       className="max-w-2xl mx-auto"
     >
@@ -94,6 +192,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           <Switch />
         </Form.Item>
       </div>
+
       {/* Product Type */}
       <div className="bg-white p-6 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Product Type</h2>
@@ -105,9 +204,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
         >
           <Input />
         </Form.Item>
-
-        
       </div>
+
       {/* Dimensions */}
       <div className="bg-white p-6 rounded-lg shadow mb-6">
         <h2 className="text-lg font-semibold mb-4">Dimensions</h2>
@@ -197,9 +295,22 @@ const ProductForm: React.FC<ProductFormProps> = ({
         </Form.List>
       </div>
 
-      {/* Product Images */}
+      {/* File Upload Section */}
       <div className="bg-white p-6 rounded-lg shadow mb-6">
-        <h2 className="text-lg font-semibold mb-4">Product Images</h2>
+        <h2 className="text-lg font-semibold mb-4">Upload Product Images</h2>
+        
+        <Upload {...uploadProps}>
+          <Button icon={<UploadOutlined />}>Select Images</Button>
+        </Upload>
+        
+        <div className="mt-2 text-sm text-gray-500">
+          Support: JPG, PNG, GIF (Max: 5MB each)
+        </div>
+      </div>
+
+      {/* Manual Product Images */}
+      <div className="bg-white p-6 rounded-lg shadow mb-6">
+        <h2 className="text-lg font-semibold mb-4">Manual Image URLs</h2>
 
         <Form.List name="productImages">
           {(fields, { add, remove }) => (
@@ -220,7 +331,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 </div>
               ))}
               <Button type="dashed" onClick={() => add()} block>
-                <PlusOutlined /> Add Image
+                <PlusOutlined /> Add Manual Image URL
               </Button>
             </>
           )}
@@ -297,8 +408,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
       </div>
 
       <Form.Item>
-        <Button type="primary" htmlType="submit" block size="large">
-          Submit
+        <Button 
+          type="primary" 
+          htmlType="submit" 
+          block 
+          size="large"
+          loading={uploading}
+        >
+          {uploading ? 'Uploading...' : 'Submit'}
         </Button>
       </Form.Item>
     </Form>

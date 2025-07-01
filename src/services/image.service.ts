@@ -4,7 +4,7 @@ import { client } from "./clients";
 interface IUploadImageResponse {
   url: string; // The URL of the uploaded image
 }
-const BASE_URL = '/Image';
+const BASE_URL = '/image';
 export const uploadImage = async (file: File): Promise<IUploadImageResponse> => {
   const formData = new FormData();
   formData.append("file", file);

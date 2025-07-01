@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Form,
   Input,
@@ -13,6 +13,7 @@ import {
   Col,
   message,
   Divider,
+  Spin,
 } from "antd";
 import {
   MinusCircleOutlined,
@@ -20,6 +21,9 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { uploadImage } from "../../../services/image.service";
+import MUIRichTextEditor from "mui-rte";
+import { CKEditor } from "@ckeditor/ckeditor5-react";
+import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 const { Title, Text } = Typography;
 
@@ -137,26 +141,23 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [imageList, setImageList] = useState<ProductImage[]>(
     initialValues?.images || []
   );
-
-  // Add default image if no images provided
-  useEffect(() => {
-    if (!initialValues?.images?.length) {
-      setImageList([{ imageUrl: "https://yavuzceliker.github.io/sample-images/image-245.jpg", isMain: true }]);
-      form.setFieldsValue({
-        images: [{ imageUrl: "https://yavuzceliker.github.io/sample-images/image-245.jpg", isMain: true }]
-      });
-    }
-  }, [initialValues?.images, form]);
+  const [description, setDescription] = useState<string>(initialValues?.description || "");
+  const [imageUploading, setImageUploading] = useState(false);
 
   const handleImageUpload = async (file: File) => {
+    setImageUploading(true);
     try {
       const response = await uploadImage(file);
       const currentImages = form.getFieldValue("images") || [];
-      currentImages.push({ imageUrl: response, isMain: currentImages.length === 0 });
-      form.setFieldsValue({ images: currentImages });
+      const newImage = { imageUrl: response, isMain: currentImages.length === 0 };
+      const updatedImages = [...currentImages, newImage];
+      setImageList(updatedImages);
+      form.setFieldsValue({ images: updatedImages });
       message.success("Tải ảnh lên thành công!");
     } catch (error) {
       message.error("Tải ảnh lên thất bại.");
+    } finally {
+      setImageUploading(false);
     }
   };
 
@@ -202,10 +203,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const handleSubmit = (values: any) => {
     const formData = {
       ...values,
-      images: imageList.map((img) => ({
-        imageUrl: img.imageUrl,
-        isMain: img.isMain
-      })),
+      description: description,
+      images: imageList,
       variants: values.variants?.map((variant: ProductVariant) => ({
         attributes: variant.attributes,
         price: variant.price,
@@ -251,14 +250,28 @@ const ProductForm: React.FC<ProductFormProps> = ({
             </Col>
             <Col span={12}>
               <Form.Item
-                name="description"
                 label="Mô Tả"
-                rules={[
-                  { required: true, message: "Vui lòng nhập mô tả sản phẩm" },
-                  { max: 200, message: "Mô tả không được vượt quá 200 ký tự" },
-                ]}
+                required
+                validateStatus={(!description || description.length === 0) ? "error" : (description.length > 200 ? "error" : "success")}
+                help={
+                  !description || description.length === 0
+                    ? "Vui lòng nhập mô tả sản phẩm"
+                    : description.length > 200
+                    ? "Mô tả không được vượt quá 200 ký tự"
+                    : null
+                }
               >
-                <Input.TextArea rows={4} />
+                <CKEditor
+                  editor={ClassicEditor}
+                  data={description}
+                  onChange={(_event: any, editor: any) => {
+                    const data = editor.getData();
+                    setDescription(data);
+                  }}
+                  config={{
+                    placeholder: "Nhập mô tả sản phẩm...",
+                  }}
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -595,8 +608,11 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   <Upload
                     customRequest={({ file }) => handleImageUpload(file as File)}
                     showUploadList={false}
+                    disabled={imageUploading}
                   >
-                    <Button icon={<UploadOutlined />}>Tải Ảnh Lên</Button>
+                    <Button icon={<UploadOutlined />} loading={imageUploading}>
+                      {imageUploading ? "Đang tải..." : "Tải Ảnh Lên"}
+                    </Button>
                   </Upload>
                 </Form.Item>
               </>

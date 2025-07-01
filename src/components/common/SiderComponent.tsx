@@ -17,23 +17,6 @@ type MenuItem = Required<MenuProps>["items"][number];
 const SiderComponent = () => {
   const items: MenuItem[] = [
     {
-      key: "stores",
-      label: "Quản lý Cửa hàng",
-      icon: <AiFillShop size={20} />,
-      children: [
-        {
-          key: "stores",
-          label: <Link to={"/stores"}>Tất cả</Link>,
-          icon: <AiOutlineTable />,
-        },
-        {
-          key: "addNew",
-          label: <Link to={`/stores/add-store`}>Thêm mới</Link>,
-          icon: <AiOutlineFileAdd />,
-        },
-      ],
-    },
-    {
       key: "products",
       label: "Quản lý Sản phẩm",
       icon: <AiFillProduct size={20} />,

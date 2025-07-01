@@ -55,7 +55,7 @@ const ProductsScreen = () => {
       direction="vertical"
     >
       <Typography style={{ fontSize: 30, marginTop: 20, fontWeight: 600 }}>
-        Quản lý cửa hàng
+        Quản lý Sản phẩm
       </Typography>
       <div
         style={{

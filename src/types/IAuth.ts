@@ -3,8 +3,9 @@ import { IUser } from "./IUser";
 export interface IAuthState {
   user: IUser | null;
   token: string | null;
+  refreshToken: string | null;
   error: string | null; // Add an error field to track authentication-related errors
-  setAuth: (user: IUser | null, token: string | null) => void; 
+  setAuth: (user: IUser | null, token: string | null, refreshToken: string | null) => void; 
   register: (
     email: string, 
     password: string, 

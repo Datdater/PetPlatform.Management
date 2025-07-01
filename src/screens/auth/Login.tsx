@@ -27,7 +27,7 @@ const Login = () => {
     );
     const authStore = useAuthStore.getState();
     if (success) {
-      message.success("Login successful!");
+      message.success("Đăng nhập thành công!");
       if (isRemember) {
         localStorage.setItem(
           localDataNames.authData,
@@ -42,7 +42,7 @@ const Login = () => {
       }
       navigate("/");
     } else {
-      message.error(error || "Login failed. Please check your credentials.");
+      message.error(error || "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
     }
 
     setIsLoading(false);
@@ -76,22 +76,21 @@ const Login = () => {
             style={{ width: 48, height: 48, marginBottom: 8 }}
           />
           <Title level={3} style={{ fontWeight: 600, color: "#333" }}>
-            Log in to your account
+            Đăng nhập tài khoản
           </Title>
-          <Text type="secondary">Welcome back! Please enter your details.</Text>
+          <Text type="secondary">Chào mừng bạn quay lại! Vui lòng nhập thông tin.</Text>
         </div>
 
         <Form layout="vertical" form={form} onFinish={handleLogin} size="large">
           <Form.Item
             name="emailOrPhone"
-            label="Email"
-            rules={[{ required: true, message: "Please enter your email!" }]}
+            label="Email hoặc Số điện thoại"
+            rules={[{ required: true, message: "Vui lòng nhập email hoặc số điện thoại!" }]}
           >
             <Input
-              placeholder="Enter your email"
+              placeholder="Nhập email hoặc số điện thoại"
               allowClear
               maxLength={100}
-              type="email"
               style={{
                 borderRadius: 6,
                 borderColor: "#d9d9d9",
@@ -102,11 +101,11 @@ const Login = () => {
 
           <Form.Item
             name="password"
-            label="Password"
-            rules={[{ required: true, message: "Please enter your password!" }]}
+            label="Mật khẩu"
+            rules={[{ required: true, message: "Vui lòng nhập mật khẩu!" }]}
           >
             <Input.Password
-              placeholder="Enter your password"
+              placeholder="Nhập mật khẩu"
               maxLength={100}
               style={{
                 borderRadius: 6,
@@ -128,13 +127,13 @@ const Login = () => {
               checked={isRemember}
               onChange={(e) => setIsRemember(e.target.checked)}
             >
-              Remember for 30 days
+              Ghi nhớ 30 ngày
             </Checkbox>
             <Link
               to="/forgot-password"
               style={{ color: "#1890ff", fontWeight: 500 }}
             >
-              Forgot password?
+              Quên mật khẩu?
             </Link>
           </div>
 
@@ -150,16 +149,16 @@ const Login = () => {
               height: 45,
             }}
           >
-            Log in
+            Đăng nhập
           </Button>
 
           <div style={{ textAlign: "center", marginTop: 16 }}>
-            <Text type="secondary">Don't have an account?</Text>
+            <Text type="secondary">Chưa có tài khoản?</Text>
             <Link
               to="/sign-up"
               style={{ color: "#1890ff", fontWeight: 500, marginLeft: 6 }}
             >
-              Sign up
+              Đăng ký
             </Link>
           </div>
         </Form>

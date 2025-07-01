@@ -1,5 +1,5 @@
-import { Typography, Card, Space, Flex, Table, Tag, Divider } from 'antd';
-import { UserOutlined, PhoneOutlined, EnvironmentOutlined, ClockCircleOutlined, SolutionOutlined } from '@ant-design/icons';
+import { Typography, Card, Space, Flex, Table, Tag, Divider, Button } from 'antd';
+import { UserOutlined, PhoneOutlined, EnvironmentOutlined, ClockCircleOutlined, SolutionOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 
@@ -30,12 +30,20 @@ interface BookingDetailProps {
         paymentMethod: string;
         note?: string;
     };
+    onBack?: () => void;
 }
 
-const BookingDetailScreen: React.FC<BookingDetailProps> = ({ booking }) => {
+const BookingDetailScreen: React.FC<BookingDetailProps> = ({ booking, onBack }) => {
     return (
         <div style={{ padding: '20px' }}>
-            <Title level={2}>Chi Tiết Đặt Lịch #{booking.id}</Title>
+            <Flex align="center" gap="middle" style={{ marginBottom: 16 }}>
+                {onBack && (
+                    <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
+                        Quay lại
+                    </Button>
+                )}
+                <Title level={2} style={{ margin: 0 }}>Chi Tiết Đặt Lịch #{booking.id}</Title>
+            </Flex>
 
             {/* Status Section */}
             <Card style={{ marginBottom: 20, boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.1)" }}>
