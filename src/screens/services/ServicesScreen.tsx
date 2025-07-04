@@ -134,13 +134,8 @@ const ServicesScreen = () => {
                       style={{ height: 200, objectFit: 'cover' }}
                     />
                   }
-                  actions={[
-                    <AiTwotoneEye
-                      key="view"
-                      size={20}
-                      onClick={() => handleView(service.id)}
-                    />,
-                  ]}
+                  onClick={() => handleView(service.id)}
+                  style={{ cursor: 'pointer' }}
                 >
                   <Card.Meta
                     title={service.name}

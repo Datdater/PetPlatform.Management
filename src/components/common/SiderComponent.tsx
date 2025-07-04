@@ -1,7 +1,7 @@
 /** @format */
 
 import { Flex, Layout, Menu, MenuProps, Image, Typography } from "antd";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { appInfo } from "../../constants/appInfos";
 import { colors } from "../../constants/colors";
 import { AiFillContainer, AiFillProduct, AiFillShop } from "react-icons/ai";
@@ -15,6 +15,7 @@ const { Text } = Typography;
 type MenuItem = Required<MenuProps>["items"][number];
 
 const SiderComponent = () => {
+  const navigate = useNavigate();
   const items: MenuItem[] = [
     {
       key: "products",
@@ -69,22 +70,14 @@ const SiderComponent = () => {
   ];
   return (
     <Sider width={280} theme="light" style={{ height: "100vh" }}>
-      <Flex style={{ padding: "20px", alignItems: "center" }} align="middle">
-        <Image width={64} src={appInfo.logo} alt={appInfo.title} preview={false} />
-        <Text
-          style={{
-            fontWeight: "bold",
-            fontSize: "1.5rem",
-            color: "#5abab5",
-            margin: 0,
-            marginLeft: 16,
-            display: "flex",
-            alignItems: "center",
-            height: 64,
-          }}
-        >
-          {appInfo.title}
-        </Text>
+      <Flex style={{ padding: "20px 0", alignItems: "center", justifyContent: "center" }} align="middle" justify="center">
+        <Image
+          width={64}
+          src={appInfo.logo}
+          preview={false}
+          style={{ cursor: "pointer" }}
+          onClick={() => navigate("/")}
+        />
       </Flex>
       <Menu
         mode="inline"

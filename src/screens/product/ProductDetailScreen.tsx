@@ -15,12 +15,14 @@ import {
     Divider,
     InputNumber,
     Popconfirm,
-    Input
+    Input,
+    Breadcrumb
 } from 'antd';
 import { ArrowLeftOutlined, EditOutlined, DeleteOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router';
 import { getProductById } from '../../services/product.service';
 import { IProductDetail } from '../../types/IProduct';
+import { Link } from 'react-router';
 
 const { TextArea } = Input;
 const { Title, Text, Paragraph } = Typography;
@@ -42,9 +44,7 @@ const ProductDetailScreen: React.FC = () => {
                 const data = await getProductById(id!) as IProductDetail;
                 setProduct(data);
                 setEditedProduct(data);
-                if (data?.variants?.length > 0) {
-                    setSelectedAttributes(data.variants[0].attributes);
-                }
+                setSelectedAttributes({});
             } catch (error) {
                 message.error('Không thể tải thông tin sản phẩm');
             } finally {
@@ -110,6 +110,9 @@ const ProductDetailScreen: React.FC = () => {
     const selectedVariant = getAvailableVariants()[0] || null;
     const maxStock = selectedVariant ? selectedVariant.stock : 0;
 
+    // Breadcrumb label
+    const breadcrumbName = product?.name || 'Chi tiết sản phẩm';
+
     if (loading) {
         return (
             <div style={{ textAlign: 'center', padding: '50px' }}>
@@ -142,13 +145,14 @@ const ProductDetailScreen: React.FC = () => {
 
     return (
         <div style={{ padding: '20px' }}>
+            <Breadcrumb style={{ marginBottom: 20 }}>
+                <Breadcrumb.Item>
+                    <Link to="/products">Sản phẩm</Link>
+                </Breadcrumb.Item>
+                <Breadcrumb.Item>{breadcrumbName}</Breadcrumb.Item>
+            </Breadcrumb>
+
             <Space style={{ marginBottom: 20 }}>
-                <Button
-                    icon={<ArrowLeftOutlined />}
-                    onClick={() => navigate('/products')}
-                >
-                    Quay lại Danh sách Sản phẩm
-                </Button>
                 {!isEditing ? (
                     <Button
                         type="primary"
@@ -228,7 +232,6 @@ const ProductDetailScreen: React.FC = () => {
                                     <Title level={3}>{product.name}</Title>
                                 )}
                                 <Space>
-                                    <Tag color="green">{product.storeName}</Tag>
                                     <Tag color="yellow">{product.categoryName}</Tag>
                                 </Space>
                             </div>
@@ -310,46 +313,91 @@ const ProductDetailScreen: React.FC = () => {
                                 )}
                                 <Text type="secondary">Đã bán: {product.sold}</Text>
                             </Space>
+                           {/* Attribute Selection */}
+                            <Title level={5} style={{ marginBottom: 8 }}>
+                                <Space>
+                                    Tùy chọn
+                                    {Object.keys(selectedAttributes).length > 0 && (
+                                        <Button 
+                                            size="small" 
+                                            type="link" 
+                                            danger
+                                            onClick={() => setSelectedAttributes({})}
+                                            style={{ padding: 0, height: 'auto' }}
+                                        >
+                                            Xóa tất cả
+                                        </Button>
+                                    )}
+                                </Space>
+                            </Title>
 
-                            {/* Attribute Selection */}
-                            <Title level={5} style={{ marginBottom: 8 }}>Tùy chọn</Title>
                             {Object.keys(attributeTypes).map(attributeType => (
-                                <div key={attributeType}>
-                                    <Text style={{ fontWeight: 600, fontSize: 16 }}>{attributeType} </Text>
+                                <div key={attributeType} style={{ marginBottom: 16 }}>
+                                    <Text style={{ fontWeight: 600, fontSize: 16 }}>{attributeType}</Text>
                                     <Space wrap style={{ marginTop: 8 }}>
-                                        {attributeTypes[attributeType].map(value => (
-                                            <Tag
-                                                key={value}
-                                                color={selectedAttributes[attributeType] === value ? 'processing' : 'default'}
-                                                onClick={() => handleAttributeSelect(attributeType, value)}
-                                                style={{
-                                                    cursor: 'pointer',
-                                                    padding: '6px 12px',
-                                                    fontSize: 14,
-                                                    borderRadius: 4,
-                                                    border: selectedAttributes[attributeType] === value ? '1px solid #1890ff' : undefined,
-                                                }}
-                                            >
-                                                {value}
-                                            </Tag>
-                                        ))}
+                                        {attributeTypes[attributeType].map(value => {
+                                            // Kiểm tra xem tùy chọn này có available không
+                                            const isAvailable = product.variants.some(variant => {
+                                                const thisAttrMatch = variant.attributes[attributeType] === value;
+                                                if (!thisAttrMatch) return false;
+                                                
+                                                const otherAttrsMatch = Object.entries(selectedAttributes).every(
+                                                    ([attr, val]) => {
+                                                        if (attr === attributeType) return true;
+                                                        return variant.attributes[attr] === val;
+                                                    }
+                                                );
+                                                
+                                                return otherAttrsMatch && variant.price > 0 && variant.stock > 0;
+                                            });
+
+                                            const isSelected = selectedAttributes[attributeType] === value;
+                                            
+                                            return (
+                                                <Tag
+                                                    key={value}
+                                                    color={isSelected ? 'processing' : (isAvailable ? 'default' : 'default')}
+                                                    onClick={() => {
+                                                        if (isSelected) {
+                                                            // Nếu đã chọn, click để bỏ chọn
+                                                            const newSelected = { ...selectedAttributes };
+                                                            delete newSelected[attributeType];
+                                                            setSelectedAttributes(newSelected);
+                                                        } else if (isAvailable) {
+                                                            // Nếu chưa chọn và available, click để chọn
+                                                            handleAttributeSelect(attributeType, value);
+                                                        }
+                                                    }}
+                                                    style={{
+                                                        cursor: (isSelected || isAvailable) ? 'pointer' : 'not-allowed',
+                                                        opacity: (isSelected || isAvailable) ? 1 : 0.5,
+                                                        padding: '6px 12px',
+                                                        fontSize: 14,
+                                                        borderRadius: 4,
+                                                        border: isSelected ? '1px solid #1890ff' : undefined,
+                                                        backgroundColor: isSelected ? '#e6f7ff' : undefined,
+                                                    }}
+                                                >
+                                                    {value}
+                                                    {isSelected && (
+                                                        <CloseOutlined 
+                                                            style={{ marginLeft: 4, fontSize: 10 }} 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                const newSelected = { ...selectedAttributes };
+                                                                delete newSelected[attributeType];
+                                                                setSelectedAttributes(newSelected);
+                                                            }}
+                                                        />
+                                                    )}
+                                                </Tag>
+                                            );
+                                        })}
                                     </Space>
                                 </div>
                             ))}
-
                             {/* Quantity & Stock */}
-                            <Title level={5} style={{ marginBottom: 8 }}>Số lượng & Kho</Title>
-                            <Space size="large" align="center">
-                                <Text style={{ fontWeight: 600 }}>Kho: {maxStock}</Text>
-                                <InputNumber
-                                    min={1}
-                                    max={maxStock}
-                                    value={quantity}
-                                    onChange={(value) => setQuantity(value || 1)}
-                                    disabled
-                                    style={{ width: 100 }}
-                                />
-                            </Space>
+                            <Title level={5} style={{ marginBottom: 8 }}>Số lượng & Kho: {maxStock}</Title>
                         </Space>
                     </Col>
                 </Row>

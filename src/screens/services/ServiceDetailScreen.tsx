@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Tag, Space, Table, Typography, Spin, Rate } from "antd";
+import { Button, Tag, Space, Table, Typography, Spin, Rate, Breadcrumb } from "antd";
 import { AiOutlinePlus } from "react-icons/ai";
 import { PetServiceDetail, PetServiceStep, IServiceDetailResponse } from "../../types/IServices";
 import { useFetchService } from "../../hooks/services/useFetchService";
@@ -9,6 +9,7 @@ import PetServiceModals from "../../components/features/services/PetServiceModal
 import { useUpdateService } from "../../hooks/services/useUpdateService";
 import { useDeleteServiceDetail, useDeleteServiceStep } from "../../hooks/services/useDeleteService";
 import Swal from "sweetalert2";
+import { Link } from "react-router";
 
 const ServiceDetail: React.FC = () => {
     const { serviceId } = useParams<{ serviceId: string }>();
@@ -64,6 +65,9 @@ const ServiceDetail: React.FC = () => {
     if (isError && !localServiceDetail) {
         return <div>Lỗi: Không tìm thấy dịch vụ</div>;
     }
+
+    // Breadcrumb label
+    const breadcrumbName = localServiceDetail?.name || "Chi tiết dịch vụ";
 
     const handleUpdateServiceDetail = () => {
         setIsServiceDetailModalVisible(true);
@@ -295,6 +299,12 @@ const ServiceDetail: React.FC = () => {
 
     return (
         <div style={{ padding: "20px" }}>
+            <Breadcrumb style={{ marginBottom: 20 }}>
+                <Breadcrumb.Item>
+                    <Link to="/services">Dịch vụ</Link>
+                </Breadcrumb.Item>
+                <Breadcrumb.Item>{breadcrumbName}</Breadcrumb.Item>
+            </Breadcrumb>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "20px" }}>
                 <div style={{ flex: 1 }}>
                     <Typography.Title level={2}>{localServiceDetail?.name}</Typography.Title>

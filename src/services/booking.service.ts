@@ -49,7 +49,6 @@ export const fetchBookings = async (
     '/booking',
     {
       params: {
-        StoreId: storeId,
         PageNumber: pageIndex,
         PageSize: pageSize,
       },

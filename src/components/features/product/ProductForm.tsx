@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Form,
   Input,
@@ -14,6 +14,7 @@ import {
   message,
   Divider,
   Spin,
+  UploadProps,
 } from "antd";
 import {
   MinusCircleOutlined,
@@ -21,21 +22,11 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 import { uploadImage } from "../../../services/image.service";
+import { getProductCategories } from "../../../services/product.service";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 const { Title, Text } = Typography;
-
-// Sample data
-const categories = [
-  { id: "cat1", name: "Phụ Kiện thú cưng" },
-  { id: "43715788-0B06-4ACE-92CB-2D1AF7A46B6F", name: "Thức ăn cho chó" },
-];
-
-const stores = [
-  { id: "store-001", name: "Store 1" },
-  { id: "AD1B7764-A89E-45BC-95EF-ADD55ECBC1E1", name: "Store 5" },
-];
 
 interface AttributeDefinition {
   name: string;
@@ -137,27 +128,51 @@ const ProductForm: React.FC<ProductFormProps> = ({
   loading = false,
 }) => {
   const [form] = Form.useForm<ProductFormValues>();
-  const [imageList, setImageList] = useState<ProductImage[]>(
-    initialValues?.images || []
-  );
+  const [fileList, setFileList] = useState<any[]>([]);
   const [description, setDescription] = useState<string>(initialValues?.description || "");
-  const [imageUploading, setImageUploading] = useState(false);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
 
-  const handleImageUpload = async (file: File) => {
-    setImageUploading(true);
-    try {
-      const response = await uploadImage(file);
-      const currentImages = form.getFieldValue("images") || [];
-      const newImage = { imageUrl: response, isMain: currentImages.length === 0 };
-      const updatedImages = [...currentImages, newImage];
-      setImageList(updatedImages);
-      form.setFieldsValue({ images: updatedImages });
-      message.success("Tải ảnh lên thành công!");
-    } catch (error) {
-      message.error("Tải ảnh lên thất bại.");
-    } finally {
-      setImageUploading(false);
-    }
+  useEffect(() => {
+    setCategoriesLoading(true);
+    getProductCategories()
+      .then((data) => setCategories(data))
+      .catch(() => setCategories([]))
+      .finally(() => setCategoriesLoading(false));
+  }, []);
+
+  const uploadProps: UploadProps = {
+    action: `${import.meta.env.VITE_BACKEND_URL}/image`,
+    listType: "picture-card",
+    fileList: fileList,
+    onChange(info) {
+      let fl = [...info.fileList];
+      // Only keep files with response or done status
+      fl = fl.map(file => {
+        if (file.response && file.status === "done") {
+          return {
+            ...file,
+            url: file.response, // for preview
+          };
+        }
+        return file;
+      });
+      setFileList(fl);
+      // Update form images field with uploaded URLs
+      const images = fl
+        .filter(f => f.status === "done" && f.response)
+        .map((f, idx) => ({ imageUrl: f.response, isMain: idx === 0 }));
+      form.setFieldsValue({ images });
+    },
+    onRemove(file) {
+      const newFileList = fileList.filter(f => f.uid !== file.uid);
+      setFileList(newFileList);
+      // Update form images field
+      const images = newFileList
+        .filter(f => f.status === "done" && f.response)
+        .map((f, idx) => ({ imageUrl: f.response, isMain: idx === 0 }));
+      form.setFieldsValue({ images });
+    },
   };
 
   const handleAddAttribute = () => {
@@ -200,17 +215,21 @@ const ProductForm: React.FC<ProductFormProps> = ({
   };
 
   const handleSubmit = (values: any) => {
+    // Validate images
+    if (!fileList || fileList.length === 0) {
+      message.error("Vui lòng thêm ít nhất một hình ảnh");
+      return;
+    }
     const formData = {
       ...values,
       description: description,
-      images: imageList,
+      images: fileList.map(f => ({ imageUrl: f.url, isMain: f.isMain })),
       variants: values.variants?.map((variant: ProductVariant) => ({
         attributes: variant.attributes,
         price: variant.price,
         stock: variant.stock
       })) || []
     };
-
     onSubmit(formData);
   };
 
@@ -251,12 +270,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <Form.Item
                 label="Mô Tả"
                 required
-                validateStatus={(!description || description.length === 0) ? "error" : (description.length > 200 ? "error" : "success")}
+                validateStatus={(!description || description.length === 0) ? "error" : (description.length > 2000 ? "error" : "success")}
                 help={
                   !description || description.length === 0
                     ? "Vui lòng nhập mô tả sản phẩm"
-                    : description.length > 200
-                    ? "Mô tả không được vượt quá 200 ký tự"
+                    : description.length > 2000
+                    ? "Mô tả không được vượt quá 2000 ký tự"
                     : null
                 }
               >
@@ -282,25 +301,15 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 label="Danh Mục"
                 rules={[{ required: true, message: "Vui lòng chọn danh mục" }]}
               >
-                <Select size="large" placeholder="Chọn danh mục">
+                <Select
+                  size="large"
+                  placeholder={categoriesLoading ? "Đang tải..." : "Chọn danh mục"}
+                  loading={categoriesLoading}
+                  disabled={categoriesLoading}
+                >
                   {categories.map(category => (
                     <Select.Option key={category.id} value={category.id}>
                       {category.name}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item
-                name="storeId"
-                label="Cửa Hàng"
-                rules={[{ required: true, message: "Vui lòng chọn cửa hàng" }]}
-              >
-                <Select size="large" placeholder="Chọn cửa hàng">
-                  {stores.map(store => (
-                    <Select.Option key={store.id} value={store.id}>
-                      {store.name}
                     </Select.Option>
                   ))}
                 </Select>
@@ -340,7 +349,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           }
         >
           <Row gutter={16}>
-            <Col span={8}>
+            <Col span={6}>
               <Form.Item
                 name="weight"
                 label="Khối Lượng (kg)"
@@ -358,7 +367,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 />
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
               <Form.Item
                 name="length"
                 label="Chiều Dài (cm)"
@@ -376,7 +385,25 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 />
               </Form.Item>
             </Col>
-            <Col span={8}>
+            <Col span={6}>
+              <Form.Item
+                name="width"
+                label="Chiều Rộng (cm)"
+                rules={[
+                  { required: true, message: "Vui lòng nhập chiều rộng" },
+                  { type: "number", min: 0.01, message: "Chiều rộng phải lớn hơn 0.01" }
+                ]}
+              >
+                <InputNumber
+                  min={0.01}
+                  step={0.01}
+                  precision={2}
+                  style={{ width: "100%" }}
+                  size="large"
+                />
+              </Form.Item>
+            </Col>
+            <Col span={6}>
               <Form.Item
                 name="height"
                 label="Chiều Cao (cm)"
@@ -560,63 +587,20 @@ const ProductForm: React.FC<ProductFormProps> = ({
         <Card
           className="shadow-md hover:shadow-lg transition-shadow"
           title={
-            <Space>
-              <Title level={4} style={{ margin: 0 }}>
-                Hình Ảnh Sản Phẩm
-              </Title>
-            </Space>
+            <span style={{ fontWeight: 600 }}>
+              Hình Ảnh Sản Phẩm
+            </span>
           }
+          style={{ marginBottom: 24 }}
         >
-          <Form.List
-            name="images"
-            rules={[
-              {
-                validator: async (_, value) => {
-                  if (!value || value.length === 0) {
-                    return Promise.reject(new Error("Vui lòng thêm ít nhất một hình ảnh"));
-                  }
-                },
-              },
-            ]}
-          >
-            {(fields, { add, remove }) => (
-              <>
-                {fields.map(({ key, name, ...restField }) => (
-                  <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'imageUrl']}
-                      rules={[{ required: true, message: 'Vui lòng nhập URL hình ảnh' }]}
-                    >
-                      <Input placeholder="URL hình ảnh" />
-                    </Form.Item>
-                    <Form.Item
-                      {...restField}
-                      name={[name, 'isMain']}
-                      valuePropName="checked"
-                    >
-                      <Select style={{ width: 120 }}>
-                        <Select.Option value={true}>Ảnh chính</Select.Option>
-                        <Select.Option value={false}>Ảnh phụ</Select.Option>
-                      </Select>
-                    </Form.Item>
-                    <MinusCircleOutlined onClick={() => remove(name)} />
-                  </Space>
-                ))}
-                <Form.Item>
-                  <Upload
-                    customRequest={({ file }) => handleImageUpload(file as File)}
-                    showUploadList={false}
-                    disabled={imageUploading}
-                  >
-                    <Button icon={<UploadOutlined />} loading={imageUploading}>
-                      {imageUploading ? "Đang tải..." : "Tải Ảnh Lên"}
-                    </Button>
-                  </Upload>
-                </Form.Item>
-              </>
+          <Upload {...uploadProps}>
+            {fileList.length >= 8 ? null : (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <PlusOutlined style={{ fontSize: 24 }} />
+                <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>Tải Ảnh</div>
+              </div>
             )}
-          </Form.List>
+          </Upload>
         </Card>
 
         <Form.Item>

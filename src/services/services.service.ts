@@ -2,11 +2,10 @@ import {IServiceDetailResponse, ServicesResponse} from "../types/IServices.ts";
 import { feClient } from "./clients";
 
 const fetchServices = async ({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
-    const response = await feClient.get<ServicesResponse>('/services', {
+    const response = await feClient.get<ServicesResponse>('/services/my-store', {
         params: {
             PageNumber: pageIndex,
             PageSize: pageSize,
-            StoreId: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
         }
     });
     return response.data;

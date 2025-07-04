@@ -5,6 +5,5 @@ export const localDataNames = {
 };
 export const appInfo = {
   logo,
-  title: "SEN&PET",
   description: "",
 };

@@ -175,11 +175,11 @@ export const handleProductError = (error: any): string => {
     return 'Error setting up the request';
   }
 };
-export const getCategories = () => {
-  return [
-    { id: "cat1", name: "Phụ Kiện thú cưng" },
-    { id: "43715788-0B06-4ACE-92CB-2D1AF7A46B6F", name: "Thức ăn cho chó" },
-  ];
+
+// Fetch product categories from API
+export const getProductCategories = async (): Promise<{ id: string; name: string }[]> => {
+  const response = await feClient.get("/ProductCategory");
+  return response.data.items;
 };
 
 export const getBrands = () => {
