@@ -74,7 +74,7 @@ const StoreIdentityFormItem = (appProps: StoreIdentityProps) => {
       </Form.Item>
 
       <Form.Item
-        label="Hình chụp mặt trước của thẻ CMND/CCCD/Hộ chiếu"
+        label="Mặt trước CMND/CCCD/Hộ chiếu"
         name="frontIdentityCardUrl"
         style={{ marginBottom: 20, textAlign: "left" }}
       >
@@ -97,7 +97,7 @@ const StoreIdentityFormItem = (appProps: StoreIdentityProps) => {
       </Form.Item>
 
       <Form.Item
-        label="Hình chụp mặt sau của thẻ CMND/CCCD/Hộ chiếu"
+        label="Mặt sau CMND/CCCD/Hộ chiếu"
         name="backIdentityCardUrl"
         style={{ marginBottom: 20, textAlign: "left" }}
       >

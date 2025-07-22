@@ -2,8 +2,7 @@ import { Typography, Tabs, Table, DatePicker, Input, Button, Space, Flex, Card, 
 import { useState, useMemo, useEffect } from 'react';
 import type { TabsProps, TableProps } from 'antd';
 import dayjs from 'dayjs';
-import OrderDetailScreen from './OrderDetailScreen';
-import { fetchOrders, confirmOrder, updateOrderStatus, updateDeliveryTime } from '../../services/order.service';
+import { fetchOrders, confirmOrder, updateOrderStatus } from '../../services/order.service';
 import { IOrder, IOrderResponse } from '../../types/IOrder';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { DownOutlined } from '@ant-design/icons';
@@ -13,42 +12,18 @@ const { RangePicker } = DatePicker;
 const { TextArea } = Input;
 const { useBreakpoint } = Grid;
 
-interface Order {
-    id: string;
-    customerInfo: {
-        name: string;
-        phone: string;
-        address: string;
-    };
-    products: Array<{
-        name: string;
-        quantity: number;
-        price: number;
-        image: string;
-    }>;
-    totalAmount: number;
-    status: string;
-    orderDate: string;
-    paymentMethod: string;
-    note?: string;
-    pickupTime?: string;
-}
-
 const OrderManagementScreen = () => {
     const screens = useBreakpoint();
-    const STORE_ID = '3fa85f64-5717-4562-b3fc-2c963f66afa6';
     const [activeTab, setActiveTab] = useState('all');
     const [isDeliveryModalVisible, setIsDeliveryModalVisible] = useState(false);
-    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [form] = Form.useForm();
-    const [showDetail, setShowDetail] = useState(false);
     const [page, setPage] = useState(1);
     const [pageSize] = useState(10);
     const queryClient = useQueryClient();
 
     const { data: ordersData, isLoading } = useQuery({
-        queryKey: ['orders', STORE_ID, page, pageSize],
-        queryFn: () => fetchOrders(STORE_ID, page, pageSize)
+        queryKey: ['orders', page, pageSize],
+        queryFn: () => fetchOrders( page, pageSize)
     });
 
     const updateOrderStatusMutation = useMutation({
@@ -77,33 +52,8 @@ const OrderManagementScreen = () => {
     };
 
     const handleDeliveryClick = (order: IOrder) => {
-        setSelectedOrder(mapIOrderToOrder(order));
-        setIsDeliveryModalVisible(true);
-    };
-
-    const handleDeliveryModalOk = async () => {
-        try {
-            const values = await form.validateFields();
-            const deliveryTime = values.pickupDateTime ? dayjs(values.pickupDateTime).format('YYYY-MM-DD HH:mm:ss') : dayjs().format('YYYY-MM-DD HH:mm:ss');
-            
-            if (selectedOrder) {
-                await updateDeliveryTime(selectedOrder.id, deliveryTime);
-                // Assuming status 'Chờ lấy hàng' corresponds to a number, e.g., 2
-                // You might need to adjust the status value based on your backend logic.
-                updateOrderStatusMutation.mutate({ orderId: selectedOrder.id, status: 2 });
-            }
-            
-            message.success('Cập nhật thời gian giao hàng thành công');
-            
-            // Refresh orders after update
-            queryClient.invalidateQueries({ queryKey: ['orders'] });
-            
-            setIsDeliveryModalVisible(false);
-            form.resetFields();
-        } catch (error) {
-            console.error('Error updating delivery time:', error);
-            message.error('Cập nhật thời gian giao hàng thất bại');
-        }
+        // setSelectedOrder(order); // Removed
+        // setIsDeliveryModalVisible(true); // Removed
     };
 
     const handleDeliveryModalCancel = () => {
@@ -119,10 +69,10 @@ const OrderManagementScreen = () => {
         updateOrderStatusMutation.mutate({ orderId, status: 4 }); // Shipped = 4
     };
 
-    const handleViewDetails = (order: IOrder) => {
-        setSelectedOrder(mapIOrderToOrder(order));
-        setShowDetail(true);
-    };
+    // const handleViewDetails = (order: IOrder) => { // Removed
+    //     setSelectedOrder(order);
+    //     setShowDetail(true);
+    // };
 
     const isAfterNoon = () => {
         return dayjs().hour() >= 12;
@@ -135,7 +85,7 @@ const OrderManagementScreen = () => {
             case 'Confirmed': return { text: 'Đã xác nhận', color: 'processing' };
             case 'Processing': return { text: 'Đang xử lý', color: 'blue' };
             case 'Shipped': return { text: 'Đang giao hàng', color: 'cyan' };
-            case 'Delivered': return { text: 'Đã giao hàng', color: 'success' };
+            case 'Delivered': return { text: 'Đã hoàn thành', color: 'success' };
             case 'Cancelled': return { text: 'Đã hủy', color: 'error' };
             case 'PaymentFailed': return { text: 'Thanh toán thất bại', color: 'error' };
             case 'Returned': return { text: 'Đã hoàn trả', color: 'magenta' };
@@ -143,30 +93,7 @@ const OrderManagementScreen = () => {
         }
     };
 
-    const orders = ordersData?.items || [];
-    const totalItems = ordersData?.totalItemsCount || 0;
-
-    // Helper: Convert IOrder to UI Order
-    const mapIOrderToOrder = (order: IOrder): Order => ({
-        id: order.id,
-        customerInfo: {
-            name: '', // backend chưa trả về, cần bổ sung nếu có
-            phone: '',
-            address: '',
-        },
-        products: order.orderDetailDTOs.map((d) => ({
-            name: d.productName,
-            quantity: d.quantity,
-            price: d.price,
-            image: d.pictureUrl,
-        })),
-        totalAmount: order.price,
-        status: order.orderStatus,
-        orderDate: order.createdTime,
-        paymentMethod: '', // backend chưa trả về
-        note: '', // backend chưa trả về
-        pickupTime: '', // backend chưa trả về
-    });
+    // Xóa hàm mapIOrderToOrder và các chỗ sử dụng nó
 
     const baseColumns: TableProps<IOrder>['columns'] = [
         {
@@ -188,6 +115,11 @@ const OrderManagementScreen = () => {
                             <img src={detail.pictureUrl} alt={detail.productName} style={{ width: 40, height: 40, marginRight: 8, objectFit: 'cover', borderRadius: 8, border: '1px solid #eee' }} />
                             <div>
                                 <div style={{ fontWeight: 600 }}>{detail.productName}</div>
+                                {detail.attribute && (
+                                    <div style={{ fontSize: 12, color: '#888' }}>
+                                        {Object.entries(detail.attribute).map(([key, value]) => `${key}: ${value}`).join(', ')}
+                                    </div>
+                                )}
                                 <div style={{ fontSize: 12, color: '#888' }}>SL: {detail.quantity}</div>
                             </div>
                         </div>
@@ -201,10 +133,18 @@ const OrderManagementScreen = () => {
             key: 'orderDate',
             width: 150,
             responsive: ['sm'],
-            render: (date: string) => <span>{dayjs(date).format('DD/MM/YYYY HH:mm')}</span>,
+            render: (date: string) => {
+                if (!date) return '';
+                // Lấy ngày/tháng/năm và giờ/phút gốc từ chuỗi ISO
+                const [d, t] = date.split('T');
+                const [year, month, day] = d.split('-');
+                const match = t.match(/(\d{2}:\d{2})/);
+                const time = match ? match[1] : '';
+                return <span>{`${day}/${month}/${year} ${time}`}</span>;
+            },
         },
         {
-            title: 'Tổng tiền (VND)',
+            title: 'Tổng tiền (VNĐ)',
             dataIndex: 'price',
             key: 'totalAmount',
             width: 120,
@@ -231,9 +171,24 @@ const OrderManagementScreen = () => {
             render: (_: any, record: IOrder) => {
                 const menu = (
                     <Menu>
-                        {record.orderStatus === 'PendingPayment' && <Menu.Item key="confirm" onClick={() => handleConfirmOrder(record.id)}>Xác nhận</Menu.Item>}
-                        {record.orderStatus === 'Confirmed' && <Menu.Item key="prepare" onClick={() => handlePrepareOrder(record.id)}>Chuẩn bị hàng</Menu.Item>}
-                        <Menu.Item key="detail" onClick={() => handleViewDetails(record)}>Xem chi tiết</Menu.Item>
+                        {record.orderStatus === 'PendingPayment' && (
+                            <Menu.Item key="confirm" onClick={() => handleConfirmOrder(record.id)}>
+                                Xác nhận
+                            </Menu.Item>
+                        )}
+                        {record.orderStatus === 'Confirmed' && (
+                            <Menu.Item key="prepare" onClick={() => handlePrepareOrder(record.id)}>
+                                Chuẩn bị hàng
+                            </Menu.Item>
+                        )}
+                        {record.orderStatus === 'Processing' && (
+                            <Menu.Item key="ship" onClick={() => handleShipOrder(record.id)}>
+                                Bàn giao ĐVVC
+                            </Menu.Item>
+                        )}
+                        {/* <Menu.Item key="detail" onClick={() => handleViewDetails(record)}> // Removed
+                            Xem chi tiết
+                        </Menu.Item> */}
                     </Menu>
                 );
                 return (
@@ -250,16 +205,13 @@ const OrderManagementScreen = () => {
     const columns = useMemo(() => baseColumns.filter(col => !col.responsive || screens[col.responsive[0]]), [screens]);
 
     const expandedRowRender = (record: IOrder) => {
-        const order = mapIOrderToOrder(record);
         return (
             <Card title="Thông tin đơn hàng" size="small">
                 <Space direction="vertical">
-                    <Text><i className="ri-user-line" style={{ marginRight: 8 }}></i>Khách hàng: {order.customerInfo?.name || 'N/A'}</Text>
-                    <Text><i className="ri-phone-line" style={{ marginRight: 8 }}></i>SĐT: {order.customerInfo?.phone || 'N/A'}</Text>
-                    <Text><i className="ri-map-pin-line" style={{ marginRight: 8 }}></i>Địa chỉ: {order.customerInfo?.address || 'N/A'}</Text>
-                    <Text><b>Ngày đặt:</b> {dayjs(order.orderDate).format('DD/MM/YYYY HH:mm')}</Text>
-                    <Text><b>Tổng tiền:</b> {order.totalAmount.toLocaleString('vi-VN')} VND</Text>
-                    {order.note && <Text><b>Ghi chú:</b> {order.note}</Text>}
+                    <Text><i className="ri-user-line" style={{ marginRight: 8 }}></i>Khách hàng: {record.customerName || 'N/A'}</Text>
+                    <Text><i className="ri-phone-line" style={{ marginRight: 8 }}></i>SĐT: {record.customerPhone || 'N/A'}</Text>
+                    <Text><i className="ri-phone-line" style={{ marginRight: 8 }}></i>Địa chỉ: {record.customerAddress || 'N/A'}</Text>
+                    <Text><i className="ri-phone-line" style={{ marginRight: 8 }}></i>Giá giao hàng: {record.deliveryPrice?.toLocaleString('vi-VN') || 'N/A'} VN Đ</Text>
                 </Space>
             </Card>
         );
@@ -271,8 +223,8 @@ const OrderManagementScreen = () => {
             label: 'Tất cả',
         },
         {
-            key: 'pending',
-            label: 'Chờ xử lý',
+            key: 'pendingpayment',
+            label: 'Chờ thanh toán',
         },
         {
             key: 'confirmed',
@@ -301,6 +253,10 @@ const OrderManagementScreen = () => {
         // TODO: Fetch orders based on the selected tab key
     };
 
+    // Đảm bảo sử dụng ordersData?.items hoặc filteredData cho Table và các logic khác
+    const orders = ordersData?.items || [];
+    const totalItems = ordersData?.totalCount || 0;
+
     // Filtered data based on active tab
     const filteredData = orders.filter(order => {
         if (activeTab === 'all') return true;
@@ -311,9 +267,7 @@ const OrderManagementScreen = () => {
         document.title = 'Quản lý Đơn hàng';
     }, []);
 
-    if (showDetail && selectedOrder) {
-        return <OrderDetailScreen order={selectedOrder} onBack={() => setShowDetail(false)} />;
-    }
+    // Removed OrderDetailScreen rendering block
 
     return (
         <div style={{ padding: screens.md ? '24px' : '12px' }}>
@@ -346,7 +300,6 @@ const OrderManagementScreen = () => {
             <Modal
                 title="Xác nhận thời gian giao hàng"
                 open={isDeliveryModalVisible}
-                onOk={handleDeliveryModalOk}
                 onCancel={handleDeliveryModalCancel}
             >
                 <Form form={form} layout="vertical">

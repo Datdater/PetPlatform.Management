@@ -13,14 +13,18 @@ import ProductsScreen from "../screens/product/ProductsScreen.tsx";
 import AddProductScreen from "../screens/product/AddProductScreen.tsx";
 import ProductDetailScreen from "../screens/product/ProductDetailScreen.tsx";
 import Profile from "../screens/auth/Profile.tsx";
-import CalendarScreen from "../screens/calendar/CalendarScreen.tsx";
 import OrderManagementScreen from "../screens/orders/OrderManagementScreen.tsx";
 import BookingManagementScreen from "../screens/bookings/BookingManagementScreen.tsx";
-import BookingDetailScreen from "../screens/bookings/BookingDetailScreen.tsx";
 import { useParams } from "react-router-dom";
+import EditProductScreen from '../screens/product/EditProductScreen';
+import AdminDashboard from "../screens/admin/AdminDashboard";
+import { useAuthStore } from "../stores/authStore";
+import UsersManagementScreen from "../screens/users/UsersManagementScreen.tsx";
+import StoresManagementScreen from "../screens/stores/StoresManagementScreen.tsx";
 
 const { Content, Footer } = Layout;
 const MainRouter = () => {
+  const { user } = useAuthStore();
   return (
     <BrowserRouter>
       <Layout>
@@ -37,7 +41,7 @@ const MainRouter = () => {
           </Affix>
           <Content className="pt-3 container-fluid">
             <Routes>
-              <Route path="/" element={<StoresScreen />} />
+              <Route path="/" element={user?.role === "Admin" ? <AdminDashboard /> : <StoresScreen />} />
               <Route path="*" element={<NotFound />} />
               <Route path="/profile" element={<Profile />} />
 
@@ -50,21 +54,24 @@ const MainRouter = () => {
               <Route path="/products" element={<ProductsScreen />} />
               <Route path="/products/add-product" element={<AddProductScreen />} />
               <Route path="/products/:id" element={<ProductDetailScreen />} />
+              <Route path="/products/:id/edit" element={<EditProductScreen />} />
 
               {/* Store route */}
               <Route path="/stores" element={<StoresScreen />} />
               <Route path="/stores/add-store" element={<AddStoreScreen />} />
               <Route path="/stores/:id" element={<StoreDetailScreen />} />
 
-              {/* Calendar route */}
-              <Route path="/calendar" element={<CalendarScreen />} />
-
               {/* Order Management route */}
               <Route path="/orders" element={<OrderManagementScreen />} />
 
               {/* Booking Management route */}
               <Route path="/bookings" element={<BookingManagementScreen />} />
-              <Route path="/bookings/:id" element={<BookingDetailRouteWrapper />} />
+              
+              {/* Booking Management route */}
+              <Route path="/list-users" element={<UsersManagementScreen />} />
+              
+              {/* Booking Management route */}
+              <Route path="/list-stores" element={<StoresManagementScreen />} />
 
               {/* Add more route here */}
             </Routes>
@@ -77,44 +84,5 @@ const MainRouter = () => {
     </BrowserRouter>
   );
 };
-
-function BookingDetailRouteWrapper() {
-  const { id } = useParams();
-  // Lấy danh sách bookings từ localStorage (hoặc có thể fetch từ API nếu cần)
-  const bookings = JSON.parse(localStorage.getItem("bookings") || "[]");
-  const selectedBooking = bookings.find((b: any) => b.bookingId === id);
-
-  if (!selectedBooking) return <NotFound />;
-
-  // Mapping sang đúng props như trong BookingManagementScreen
-  const bookingDetailProps = {
-    id: selectedBooking.bookingId,
-    customerInfo: {
-      name: selectedBooking.userName,
-      phone: selectedBooking.userPhone,
-      address: selectedBooking.userAddress || "",
-    },
-    service: {
-      name: selectedBooking.petWithServices?.[0]?.services?.[0]?.serviceDetailName || "",
-      price: selectedBooking.totalPrice,
-      duration: "",
-      image: "",
-    },
-    petInfo: {
-      name: selectedBooking.petWithServices?.[0]?.pet?.name || "",
-      type: String(selectedBooking.petWithServices?.[0]?.pet?.petType || ""),
-      breed: (selectedBooking.petWithServices?.[0]?.pet as any)?.breed || "",
-      age: (selectedBooking.petWithServices?.[0]?.pet as any)?.age || 0,
-    },
-    totalAmount: selectedBooking.totalPrice,
-    status: String(selectedBooking.status),
-    bookingDate: selectedBooking.bookingTime,
-    bookingTime: selectedBooking.bookingTime,
-    paymentMethod: selectedBooking.paymentMethod || "",
-    note: selectedBooking.note || "",
-  };
-
-  return <BookingDetailScreen booking={bookingDetailProps} />;
-}
 
 export default MainRouter;

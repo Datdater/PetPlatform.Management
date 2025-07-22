@@ -119,13 +119,13 @@ const ServiceStep: React.FC<{ serviceData?: any, onUpdateSteps?: (steps: PetServ
     return (
         <div style={{ margin: "0 auto", width: "70%", padding: "20px" }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-                <Typography.Title level={4}>Service Steps</Typography.Title>
+                <Typography.Title level={4}>Các bước dịch vụ</Typography.Title>
                 <Button
                     type="primary"
                     icon={<PlusOutlined />}
                     onClick={showModal}
                 >
-                    Add Step
+                    Thêm bước
                 </Button>
             </div>
 
@@ -162,8 +162,8 @@ const ServiceStep: React.FC<{ serviceData?: any, onUpdateSteps?: (steps: PetServ
                                 </Typography.Text>
                             </div>
                             <div>
-                                <Button type="link" onClick={() => handleUpdateStep(step)}>Update</Button>
-                                <Button type="link" onClick={() => handleDeleteStep(step)}>Delete</Button>
+                                <Button type="link" onClick={() => handleUpdateStep(step)}>Cập nhật</Button>
+                                <Button type="link" onClick={() => handleDeleteStep(step)} danger>Xóa</Button>
                             </div>
                         </div>
                         <Typography.Paragraph style={{ marginTop: "5px", color: "#595959" }}>
@@ -175,10 +175,12 @@ const ServiceStep: React.FC<{ serviceData?: any, onUpdateSteps?: (steps: PetServ
 
             {/* Add/Edit Modal */}
             <Modal
-                title={editingStep ? "Edit Service Step" : "Add Service Step"}
+                title={editingStep ? "Sửa bước dịch vụ" : "Thêm bước dịch vụ"}
                 open={isModalVisible}
                 onOk={handleOk}
                 onCancel={handleCancel}
+                okText={editingStep ? "Lưu thay đổi" : "Thêm mới"}
+                cancelText="Hủy"
             >
                 <Form
                     form={form}
@@ -190,16 +192,18 @@ const ServiceStep: React.FC<{ serviceData?: any, onUpdateSteps?: (steps: PetServ
                 >
                     <Form.Item
                         name="name"
-                        label="Step Name"
-                        rules={[{ required: true, message: 'Please enter a step name' }]}>
+                        label="Tên bước"
+                        rules={[{ required: true, message: 'Vui lòng nhập tên bước' }]}
+                    >
                         <Input />
                     </Form.Item>
 
                     <Form.Item
                         name="description"
-                        label="Step Description"
-                        rules={[{ required: true, message: 'Please enter a description' }]}>
-                        <Input.TextArea rows={4} />
+                        label="Mô tả bước"
+                        rules={[{ required: true, message: 'Vui lòng nhập mô tả bước' }]}
+                    >
+                        <Input.TextArea rows={3} />
                     </Form.Item>
                 </Form>
             </Modal>

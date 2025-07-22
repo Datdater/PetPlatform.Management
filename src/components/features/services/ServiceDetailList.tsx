@@ -116,37 +116,37 @@ const ServiceDetailList: React.FC<{ serviceData?: any, onUpdateDetails?: (detail
 
   const columns = [
     {
-      title: 'Name',
+      title: 'Tên dịch vụ',
       dataIndex: 'name',
       key: 'name',
     },
     {
-      title: 'Pet Type',
+      title: 'Loại thú cưng',
       dataIndex: 'petType',
       key: 'petType',
-      render: (petType: boolean) => petType ? 'Dog' : 'Cat',
+      render: (petType: boolean) => petType ? 'Chó' : 'Mèo',
     },
     {
-      title: 'Weight Range',
+      title: 'Khoảng cân nặng',
       key: 'weightRange',
       render: (_: any, record: PetServiceDetail) => (
           <span>{record.petWeightMin} - {record.petWeightMax} kg</span>
       ),
     },
     {
-      title: 'Amount',
+      title: 'Giá',
       dataIndex: 'amount',
       key: 'amount',
-      render: (amount: number) => `$${amount?.toFixed(2) || '0.00'}`,
+      render: (amount: number) => `${amount?.toLocaleString('vi-VN') || '0'}đ`,
     },
     {
-      title: 'Description',
+      title: 'Mô tả',
       dataIndex: 'description',
       key: 'description',
       ellipsis: true,
     },
     {
-      title: 'Actions',
+      title: 'Thao tác',
       key: 'actions',
       render: (_: any, record: PetServiceDetail) => (
           <Space size="middle">
@@ -154,12 +154,14 @@ const ServiceDetailList: React.FC<{ serviceData?: any, onUpdateDetails?: (detail
                 icon={<EditOutlined />}
                 onClick={() => showEditModal(record)}
                 type="text"
+                title="Sửa"
             />
             <Button
                 icon={<DeleteOutlined />}
                 onClick={() => handleDelete(record)}
                 type="text"
                 danger
+                title="Xóa"
             />
           </Space>
       ),
@@ -169,13 +171,13 @@ const ServiceDetailList: React.FC<{ serviceData?: any, onUpdateDetails?: (detail
   return (
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-          <Typography.Title level={4}>Service Details</Typography.Title>
+          <Typography.Title level={4}>Chi tiết dịch vụ</Typography.Title>
           <Button
               type="primary"
               icon={<PlusOutlined />}
               onClick={showModal}
           >
-            Add Detail
+            Thêm chi tiết
           </Button>
         </div>
 
@@ -187,10 +189,12 @@ const ServiceDetailList: React.FC<{ serviceData?: any, onUpdateDetails?: (detail
         />
 
         <Modal
-            title={editingDetail ? "Edit Service Detail" : "Add Service Detail"}
+            title={editingDetail ? "Sửa chi tiết dịch vụ" : "Thêm chi tiết dịch vụ"}
             open={isModalVisible}
             onOk={handleOk}
             onCancel={handleCancel}
+            okText={editingDetail ? "Lưu thay đổi" : "Thêm mới"}
+            cancelText="Hủy"
         >
           <Form
               form={form}
@@ -206,22 +210,22 @@ const ServiceDetailList: React.FC<{ serviceData?: any, onUpdateDetails?: (detail
           >
             <Form.Item
                 name="name"
-                label="Name"
+                label="Tên dịch vụ"
                 rules={[{ required: true, message: 'Please enter a name' }]}>
               <Input />
             </Form.Item>
 
             <Form.Item
                 name="petType"
-                label="Pet Type"
+                label="Loại thú cưng"
                 rules={[{ required: true, message: 'Please select a pet type' }]}>
               <Select>
-                <Select.Option value={true}>Dog</Select.Option>
-                <Select.Option value={false}>Cat</Select.Option>
+                <Select.Option value={true}>Chó</Select.Option>
+                <Select.Option value={false}>Mèo</Select.Option>
               </Select>
             </Form.Item>
 
-            <Form.Item label="Weight Range (kg)">
+            <Form.Item label="Khoảng cân nặng (kg)">
               <Input.Group compact>
                 <Form.Item
                     name="petWeightMin"
@@ -241,14 +245,14 @@ const ServiceDetailList: React.FC<{ serviceData?: any, onUpdateDetails?: (detail
 
             <Form.Item
                 name="amount"
-                label="Amount ($)"
+                label="Giá"
                 rules={[{ required: true, message: 'Please enter an amount' }]}>
               <InputNumber min={0} precision={2} style={{ width: '100%' }} />
             </Form.Item>
 
             <Form.Item
                 name="description"
-                label="Description">
+                label="Mô tả">
               <Input.TextArea rows={4} />
             </Form.Item>
           </Form>

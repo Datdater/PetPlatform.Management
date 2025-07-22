@@ -104,7 +104,7 @@ const ServicesScreen = () => {
           <div>
             <Button
               type="primary"
-              style={{ marginLeft: "auto", marginRight: 10 }}
+              style={{ marginLeft: "auto", marginRight: 10, background: '#d48806', borderColor: '#d48806' }}
               icon={<AiOutlinePlus />}
               onClick={handleAddView}
             >
@@ -116,6 +116,7 @@ const ServicesScreen = () => {
                 shape="circle"
                 icon={<AiOutlineReload />}
                 onClick={() => refetch()}
+                style={{ background: '#d48806', borderColor: '#d48806' }}
               />
             </Tooltip>
           </div>
@@ -124,35 +125,35 @@ const ServicesScreen = () => {
         <Spin spinning={isLoading}>
           <Row gutter={[16, 16]}>
             {services?.items.map((service) => (
-              <Col xs={24} sm={12} md={8} key={service.id}>
+              <Col xs={24} sm={12} md={6} key={service.id}>
                 <Card
                   hoverable
+                  style={{ cursor: 'pointer', height: 340, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden' }}
                   cover={
                     <Image
                       alt={service.name}
                       src={service.image || "https://via.placeholder.com/300x200"}
-                      style={{ height: 200, objectFit: 'cover' }}
+                      style={{ height: 160, objectFit: 'cover', borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
                     />
                   }
                   onClick={() => handleView(service.id)}
-                  style={{ cursor: 'pointer' }}
                 >
                   <Card.Meta
-                    title={service.name}
+                    title={
+                      <>
+                        {service.categoryName && (
+                          <Tag color="blue" style={{ fontWeight: 600, fontSize: 14, borderRadius: 8, marginBottom: 4, display: 'inline-block' }}>
+                            {service.categoryName}
+                          </Tag>
+                        )}
+                        <div style={{ fontWeight: 600, fontSize: 17, minHeight: 32, maxHeight: 32, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{service.name}</div>
+                      </>
+                    }
                     description={
                       <Space direction="vertical" size="small">
                         <div>
-                          <Tag color="green">{service.storeName}</Tag>
-                          <Tag color="blue">{service.categoryName}</Tag>
-                        </div>
-                        <div>
-                          <Typography.Text type="secondary">
-                            {service.description}
-                          </Typography.Text>
-                        </div>
-                        <div>
-                          <Typography.Text strong>
-                            Thời gian ước tính: {service.estimatedTime}
+                          <Typography.Text style={{ color: '#d48806', fontWeight: 700, fontSize: 16 }}>
+                            {service.basePrice?.toLocaleString('vi-VN')} VNĐ
                           </Typography.Text>
                         </div>
                         <div>
@@ -167,8 +168,8 @@ const ServicesScreen = () => {
                           </Typography.Text>
                         </div>
                         <div>
-                          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                            {service.storeAddress}
+                          <Typography.Text strong>
+                            Thời gian ước tính: {service.estimatedTime}
                           </Typography.Text>
                         </div>
                         <div>

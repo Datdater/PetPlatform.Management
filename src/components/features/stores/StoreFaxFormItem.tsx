@@ -1,4 +1,5 @@
 import { Form, Input, Radio, Select } from "antd";
+import type { FormInstance } from "antd/es/form";
 import { useEffect, useState } from "react";
 import {
   fetchProvince,
@@ -12,7 +13,11 @@ interface ISelectOption {
   label: string;
 }
 
-const StoreFaxFormItem = () => {
+interface StoreFaxFormItemProps {
+  form?: FormInstance;
+}
+
+const StoreFaxFormItem = ({ form }: StoreFaxFormItemProps) => {
   const [provinces, setProvinces] = useState<ISelectOption[]>([]);
   const [districts, setDistricts] = useState<ISelectOption[]>([]);
   const [wards, setWards] = useState<ISelectOption[]>([]);
@@ -56,6 +61,19 @@ const StoreFaxFormItem = () => {
     }
   }, [selectedDistrict, selectedWard]);
 
+  // Hàm lấy tên địa chỉ từ mã code
+  const getProvinceName = (code: string) => {
+    return provinces.find(p => p.value === code)?.label || "";
+  };
+
+  const getDistrictName = (code: string) => {
+    return districts.find(d => d.value === code)?.label || "";
+  };
+
+  const getWardName = (code: string) => {
+    return wards.find(w => w.value === code)?.label || "";
+  };
+
   return (
     <div style={{ margin: "0 auto", width: "70%", padding: "40px 0px" }}>
       <Form.Item
@@ -85,9 +103,24 @@ const StoreFaxFormItem = () => {
               .toLowerCase()
               .localeCompare((optionB?.label ?? "").toLowerCase())
           }
-          onChange={(value) => setSelectedProvince(value)}
+          onChange={(value) => {
+            setSelectedProvince(value);
+            // Cập nhật tên tỉnh/thành phố vào trường ẩn
+            if (form) {
+              const provinceName = getProvinceName(value);
+              form.setFieldsValue({ businessAddressProvinceName: provinceName });
+            }
+          }}
           options={provinces}
         />
+      </Form.Item>
+
+      {/* Trường ẩn để lưu tên tỉnh/thành phố */}
+      <Form.Item
+        name="businessAddressProvinceName"
+        hidden
+      >
+        <Input />
       </Form.Item>
 
       <Form.Item
@@ -98,7 +131,14 @@ const StoreFaxFormItem = () => {
         style={{ marginBottom: 20, textAlign: "left" }}
       >
         <Select
-          onChange={(value) => setSelectedDistrict(value)}
+          onChange={(value) => {
+            setSelectedDistrict(value);
+            // Cập nhật tên quận/huyện vào trường ẩn
+            if (form) {
+              const districtName = getDistrictName(value);
+              form.setFieldsValue({ businessAddressDistrictName: districtName });
+            }
+          }}
           showSearch
           placeholder="Chọn quận/huyện đăng ký kinh doanh"
           optionFilterProp="label"
@@ -111,6 +151,14 @@ const StoreFaxFormItem = () => {
         />
       </Form.Item>
 
+      {/* Trường ẩn để lưu tên quận/huyện */}
+      <Form.Item
+        name="businessAddressDistrictName"
+        hidden
+      >
+        <Input />
+      </Form.Item>
+
       <Form.Item
         label="Phường/Xã"
         name="businessAddressWard"
@@ -119,7 +167,14 @@ const StoreFaxFormItem = () => {
         style={{ marginBottom: 20, textAlign: "left" }}
       >
         <Select
-          onChange={(value) => setSelectedWard(value)}
+          onChange={(value) => {
+            setSelectedWard(value);
+            // Cập nhật tên phường/xã vào trường ẩn
+            if (form) {
+              const wardName = getWardName(value);
+              form.setFieldsValue({ businessAddressWardName: wardName });
+            }
+          }}
           showSearch
           placeholder="Chọn phường/xã đăng ký kinh doanh"
           optionFilterProp="label"
@@ -130,6 +185,14 @@ const StoreFaxFormItem = () => {
           }
           options={wards}
         />
+      </Form.Item>
+
+      {/* Trường ẩn để lưu tên phường/xã */}
+      <Form.Item
+        name="businessAddressWardName"
+        hidden
+      >
+        <Input />
       </Form.Item>
 
       <Form.Item

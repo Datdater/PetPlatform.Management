@@ -9,6 +9,7 @@ import { AiOutlineTable } from "react-icons/ai";
 import { AiOutlineFileAdd } from "react-icons/ai";
 import { AiOutlineCalendar } from "react-icons/ai";
 import { AiOutlineBook } from "react-icons/ai";
+import { useAuthStore } from "../../stores/authStore";
 
 const { Sider } = Layout;
 const { Text } = Typography;
@@ -16,58 +17,71 @@ type MenuItem = Required<MenuProps>["items"][number];
 
 const SiderComponent = () => {
   const navigate = useNavigate();
-  const items: MenuItem[] = [
-    {
-      key: "products",
-      label: "Quản lý Sản phẩm",
-      icon: <AiFillProduct size={20} />,
+  const { user } = useAuthStore();
 
-      children: [
-        {
-          key: "products",
-          label: <Link to={"/products"}>Tất cả</Link>,
-          icon: <AiOutlineTable />,
-        },
-        {
-          key: "addNewProduct",
-          label: <Link to={`/products/add-product`}>Thêm mới</Link>,
-          icon: <AiOutlineFileAdd />,
-        },
-      ],
-    },
-    {
-      key: "services",
-      label: "Quản lý Dịch vụ",
-      icon: <AiFillContainer size={20} />,
-      children: [
-        {
-          key: "stores",
-          label: <Link to={"/services"}>Tất cả</Link>,
-          icon: <AiOutlineTable />,
-        },
-        {
-          key: "addNew",
-          label: <Link to={`/services/add-service`}>Thêm mới</Link>,
-          icon: <AiOutlineFileAdd />,
-        },
-      ],
-    },
-    {
-      key: "calendar",
-      label: <Link to={"/calendar"}>Lịch</Link>,
-      icon: <AiOutlineCalendar size={20} />,
-    },
-    {
-      key: "orders",
-      label: <Link to={"/orders"}>Quản lý Đơn hàng</Link>,
-      icon: <AiOutlineTable size={20} />,
-    },
-    {
-      key: "bookings",
-      label: <Link to={"/bookings"}>Quản lý Đặt lịch</Link>,
-      icon: <AiOutlineBook size={20} />,
-    },
-  ];
+  let items: MenuItem[];
+
+  if (user?.role === "Admin") {
+    items = [
+      {
+        key: "users",
+        label: <Link to={"/list-users"}>Quản lý người dùng</Link>,
+        icon: <AiOutlineTable size={20} />,
+      },
+      {
+        key: "stores",
+        label: <Link to={"/list-stores"}>Quản lý cửa hàng</Link>,
+        icon: <AiFillShop size={20} />,
+      },
+    ];
+  } else {
+    items = [
+      {
+        key: "products",
+        label: "Quản lý Sản phẩm",
+        icon: <AiFillProduct size={20} />,
+        children: [
+          {
+            key: "products",
+            label: <Link to={"/products"}>Tất cả</Link>,
+            icon: <AiOutlineTable />,
+          },
+          {
+            key: "addNewProduct",
+            label: <Link to={`/products/add-product`}>Thêm mới</Link>,
+            icon: <AiOutlineFileAdd />,
+          },
+        ],
+      },
+      {
+        key: "services",
+        label: "Quản lý Dịch vụ",
+        icon: <AiFillContainer size={20} />,
+        children: [
+          {
+            key: "stores",
+            label: <Link to={"/services"}>Tất cả</Link>,
+            icon: <AiOutlineTable />,
+          },
+          {
+            key: "addNew",
+            label: <Link to={`/services/add-service`}>Thêm mới</Link>,
+            icon: <AiOutlineFileAdd />,
+          },
+        ],
+      },
+      {
+        key: "orders",
+        label: <Link to={"/orders"}>Quản lý Đơn hàng</Link>,
+        icon: <AiOutlineTable size={20} />,
+      },
+      {
+        key: "bookings",
+        label: <Link to={"/bookings"}>Quản lý Đặt lịch</Link>,
+        icon: <AiOutlineBook size={20} />,
+      },
+    ];
+  }
   return (
     <Sider width={280} theme="light" style={{ height: "100vh" }}>
       <Flex style={{ padding: "20px 0", alignItems: "center", justifyContent: "center" }} align="middle" justify="center">

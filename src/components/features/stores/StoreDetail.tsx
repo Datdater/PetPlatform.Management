@@ -22,18 +22,18 @@ const StoreDetail = ({ id }: StoreDetailProps) => {
         <h3>Hotline: </h3>
         <p> {store?.hotline}</p>
       </div>
-      <h3>Store logo</h3>
+      <h3>Logo Cửa hàng</h3>
       <Image src={store?.logoUrl} alt="Store logo" />
-      <h3>Banner logo</h3>
+      <h3>Banner Cửa hàng</h3>
       <Image src={store?.bannerUrl} alt="Store banner" />
       <h3>Fax email</h3>
       <p>{store?.faxEmail}</p>
       <h3>Fax code</h3>
       <p>{store?.faxCode}</p>
 
-      <h3>Front identity card</h3>
+      <h3>Mặt trước CCCD</h3>
       <Image src={store?.frontIdentityCardUrl} alt="Front identity card" />
-      <h3>Back identity card</h3>
+      <h3>Mặt sau CCCD</h3>
       <Image src={store?.backIdentityCardUrl} alt="Back identity card" />
     </>
   );

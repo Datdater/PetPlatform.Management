@@ -1,29 +1,32 @@
-export interface IOrderDetail {
+export interface IOrderDetailDTO {
   quantity: number;
   price: number;
   productVariationId: string;
   productName: string;
   pictureUrl: string;
   productId: string;
-  attribute: string;
+  attribute: Record<string, string>;
 }
 
 export interface IOrder {
   id: string;
   storeId: string;
+  storeName: string;
+  customerName: string;
+  customerAddress: string;
+  customerPhone: string;
   price: number;
   createdTime: string;
   deliveryPrice: number;
-  orderDetailDTOs: IOrderDetail[];
-  orderStatus: 'Confirmed' | 'PendingPayment';
+  orderDetailDTOs: IOrderDetailDTO[];
+  orderStatus: string;
 }
 
 export interface IOrderResponse {
-  totalItemsCount: number;
-  pageSize: number;
-  pageIndex: number;
-  totalPagesCount: number;
-  next: boolean;
-  previous: boolean;
+  totalCount: number;
   items: IOrder[];
+  pageIndex: number;
+  pageSize: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
 } 

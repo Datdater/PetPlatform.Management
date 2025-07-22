@@ -2,6 +2,7 @@ import { AxiosResponse } from 'axios';
 import { feClient } from './clients';
 import { IAddProduct, IProduct, IProductDetail, IUpdateProduct } from '../types/IProduct';
 import { IResponse } from '../types/IResponse';
+import axios from 'axios';
 
 const BASE_URL = '/products';
 const STORE_BASE_URL = '/products/my-store';
@@ -182,17 +183,9 @@ export const getProductCategories = async (): Promise<{ id: string; name: string
   return response.data.items;
 };
 
-export const getBrands = () => {
-  return [
-    { id: "E9534604-C257-4CC5-9831-03C4E6B1C2FE", name: "Royal Canin" },
-    { id: "9C9C5050-C1F5-4E39-A522-68825D380355", name: "Purina" },
-  ];
+export const getProductReviews = async (productId: string) => {
+  const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/Products/${productId}/reviews`);
+  return response.data;
 };
 
-export const getStores = () => {
-  return [
-    { id: "store-001", name: "Store 1" },
-    { id: "AD1B7764-A89E-45BC-95EF-ADD55ECBC1E1", name: "Store 5" },
-  ];
-};
 export type { IAddProduct as Product };

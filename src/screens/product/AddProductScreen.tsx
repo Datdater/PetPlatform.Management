@@ -1,9 +1,8 @@
 import React from 'react';
-import { Card, message } from 'antd';
+import { Card, message, Typography, Space } from 'antd';
 import ProductForm from '../../components/features/product/ProductForm';
 import { IAddProduct } from '../../types/IProduct';
 import { useAddProduct } from '../../hooks/product/useAddProduct';
-import { getStores } from '../../services/product.service';
 
 const AddProductScreen: React.FC = () => {
   const addProduct = useAddProduct();
@@ -29,17 +28,41 @@ const AddProductScreen: React.FC = () => {
     addProduct.mutate(data as any);
   };
 
-  const stores = getStores();
-
   return (
-    <div className="p-6">
-      <Card title="Add New Product" loading={addProduct.isPending}>
-        <ProductForm
-          onSubmit={handleSubmit}
-          initialValues={{}}
-        />
-      </Card>
-    </div>
+    <Space
+      style={{ width: '100%', padding: '0px 20px' }}
+      direction="vertical"
+    >
+      <Typography style={{ fontSize: 30, marginTop: 20, fontWeight: 600 }}>
+        Tạo mới sản phẩm
+      </Typography>
+      <div
+        style={{
+          backgroundColor: '#fff',
+          width: '100%',
+          borderRadius: 10,
+          padding: '10px 20px',
+          marginTop: 20,
+          boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.1)',
+        }}
+      >
+        <Card
+          style={{
+            borderRadius: 10,
+            boxShadow: 'none',
+            padding: 0,
+            background: 'transparent',
+          }}
+          loading={addProduct.isPending}
+          bordered={false}
+        >
+          <ProductForm
+            onSubmit={handleSubmit}
+            initialValues={{}}
+          />
+        </Card>
+      </div>
+    </Space>
   );
 };
 

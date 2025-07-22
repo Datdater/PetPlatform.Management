@@ -21,17 +21,17 @@ type StepContent = ServiceOverallContent | ServiceDetailContent | ServiceStepCon
 // Define your steps array with specific types
 const steps = [
     {
-        title: "Service Overall",
+        title: "Tổng quát dịch vụ",
         content: ((form: any) => <ServiceOverall form={form} />) as ServiceOverallContent,
     },
     {
-        title: "Service Detail List",
+        title: "Chi tiết các dịch vụ",
         content: ((serviceData: IServiceDetailResponse | null, onUpdateDetails: (details: PetServiceDetail[]) => void) => (
             <ServiceDetailList serviceData={serviceData} onUpdateDetails={onUpdateDetails} />
         )) as ServiceDetailContent,
     },
     {
-        title: "Service Step List",
+        title: "Các bước dịch vụ",
         content: ((serviceData: IServiceDetailResponse | null, onUpdateSteps?: (steps: PetServiceStep[]) => void) => (
             <ServiceStep serviceData={serviceData} onUpdateSteps={onUpdateSteps} />
         )) as ServiceStepContent,
@@ -349,7 +349,7 @@ const AddServiceScreen = () => {
             direction="vertical"
         >
             <Typography style={{ fontSize: 30, marginTop: 20, fontWeight: 600 }}>
-                Create New Service
+                Tạo mới dịch vụ
             </Typography>
 
             <div
@@ -370,7 +370,7 @@ const AddServiceScreen = () => {
                 <div style={{ marginTop: 24 }}>
                     {current < steps.length - 1 && current !== 2 && (
                         <Button type="primary" onClick={next}>
-                            Next
+                            Bước sau
                         </Button>
                     )}
                     {current === 2 && (
@@ -379,12 +379,12 @@ const AddServiceScreen = () => {
                             onClick={handleCreateService}
                             loading={isPending}
                         >
-                            Create
+                            Tạo dịch vụ
                         </Button>
                     )}
                     {current > 0 && (
                         <Button style={{ margin: "0 8px" }} onClick={prev}>
-                            Previous
+                            Bước trước
                         </Button>
                     )}
                 </div>

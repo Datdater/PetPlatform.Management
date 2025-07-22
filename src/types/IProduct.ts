@@ -36,6 +36,8 @@ export interface IAddProduct {
     productTypeDetails1: string;
     productTypeDetails2: string;
   }[];
+  variants: ProductVariantInput[];
+  images: ProductImageInput[];
 }
 
 export interface IProduct {
@@ -49,7 +51,8 @@ export interface IProduct {
   storeDistrict: string;
   storeWard: string;
   storeStreet: string;
-  categoryId: string;
+  categoryId: string;  
+  categoryName: string;
   productImage: string;
   starAverage: number;
   reviewCount: number;
@@ -57,6 +60,7 @@ export interface IProduct {
 }
 
 export interface ProductVariant {
+  id: string;
   attributes: {
     [key: string]: string;
   };
@@ -65,6 +69,7 @@ export interface ProductVariant {
 }
 
 export interface ProductImage {
+  id: string;
   imageUrl: string;
   isMain: boolean;
 }
@@ -81,6 +86,7 @@ export interface IProductDetail {
   basePrice: number;
   weight: number;
   length: number;
+  width: number;
   height: number;
   sold: number;
   starAverage: number;
@@ -97,13 +103,32 @@ export interface IProductImages {
 
 export interface IUpdateProduct {
   id: string;
-  productCategoryId: string;
+  categoryId: string;
   name: string;
-  isActive: boolean;
-  productDescription: string;
-  views: number;
-  brandId: string;
+  description: string;
+  basePrice: number;
+  weight: number;
+  width: number;
+  length: number;
+  height: number;
   storeId: string;
-  productTypes: ProductType[];
-  productPrices: ProductPrice[];
+  variants: ProductVariantUpdate[];
+  images: ProductImageUpdate[];
+}
+
+export interface ProductVariantInput {
+  attributes: { [key: string]: string };
+  price: number;
+  stock: number;
+}
+export interface ProductVariantUpdate extends ProductVariantInput {
+  id?: string; // id chỉ có khi update
+}
+
+export interface ProductImageInput {
+  imageUrl: string;
+  isMain: boolean;
+}
+export interface ProductImageUpdate extends ProductImageInput {
+  id?: string; // id chỉ có khi update
 }

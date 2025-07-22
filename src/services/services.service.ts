@@ -1,4 +1,4 @@
-import {IServiceDetailResponse, ServicesResponse} from "../types/IServices.ts";
+import {IServiceDetailResponse, ServicesResponse, IServiceReview} from "../types/IServices.ts";
 import { feClient } from "./clients";
 
 const fetchServices = async ({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
@@ -39,6 +39,12 @@ const fetchDeleteServiceDetail = async (serviceId: string | undefined, serviceDe
 const fetchDeleteServiceStep = async (serviceId: string | undefined, serviceStepId: string | undefined) => {
     const response = await feClient.delete(`/services/${serviceId}/service-steps/${serviceStepId}`);
     return response.data;
+}
+
+// Lấy danh sách review của dịch vụ
+export async function getServiceReviews(serviceId: string): Promise<IServiceReview[]> {
+  const response = await feClient.get(`/services/${serviceId}/reviews`);
+  return response.data;
 }
 
 export { fetchServices, fetchService, fetchUpdateService, fetchCreateService, fetchDeleteService, fetchDeleteServiceStep, fetchDeleteServiceDetail };

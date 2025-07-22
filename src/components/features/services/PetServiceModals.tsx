@@ -1,10 +1,14 @@
-import React, { useEffect } from "react";
-import { Modal, Form, Input, Button, Select } from "antd";
+import React, { useEffect, useState } from "react";
+import { Modal, Form, Input, Button, Select, Upload } from "antd";
+import { UploadOutlined, PlusOutlined } from "@ant-design/icons";
+import type { UploadFile } from "antd/es/upload/interface";
 import {
   IServiceDetailResponse,
   PetServiceDetail,
   PetServiceStep,
 } from "../../../types/IServices"; // Adjust the import path
+import { uploadImage } from '../../../services/image.service';
+import { message } from "antd";
 
 interface PetServiceModalsProps {
   isUpdateModalVisible: boolean;
@@ -52,10 +56,32 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
   const [stepForm] = Form.useForm();
   const [stepUpdateForm] = Form.useForm();
   const [form] = Form.useForm();
+  const [uploading, setUploading] = useState(false);
+  const [fileList, setFileList] = useState<UploadFile<any>[]>([]);
 
   useEffect(() => {
     if (isServiceDetailModalVisible && localServiceDetail) {
-      form.setFieldsValue(localServiceDetail);
+      // Parse estimatedTime sang tiếng Việt nếu là tiếng Anh
+      let estimatedTimeVi = localServiceDetail.estimatedTime;
+      if (estimatedTimeVi && estimatedTimeVi.includes('minutes')) {
+        estimatedTimeVi = estimatedTimeVi.replace('minutes', 'phút').trim();
+      }
+      if (estimatedTimeVi && estimatedTimeVi.includes('hours')) {
+        estimatedTimeVi = estimatedTimeVi.replace('hours', 'giờ').trim();
+      }
+      form.setFieldsValue({ ...localServiceDetail, estimatedTime: estimatedTimeVi });
+      if (localServiceDetail.image) {
+        setFileList([
+          {
+            uid: '-1',
+            name: 'image',
+            status: 'done',
+            url: localServiceDetail.image,
+          },
+        ]);
+      } else {
+        setFileList([]);
+      }
     }
   }, [isServiceDetailModalVisible, localServiceDetail, form]);
 
@@ -84,6 +110,27 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
     }
   }, [isStepUpdateModalVisible, newStep, stepUpdateForm]);
 
+  const uploadProps = {
+    name: 'file',
+    multiple: false,
+    fileList,
+    action: `${import.meta.env.VITE_BACKEND_URL}/image`,
+    listType: 'picture-card' as const,
+    onChange: (info: any) => {
+      setFileList(info.fileList);
+      if (info.file.status === 'done' && info.file.response) {
+        form.setFieldsValue({ image: info.file.response.url || info.file.response });
+      }
+      if (info.file.status === 'removed' || !info.fileList || info.fileList.length === 0) {
+        form.setFieldsValue({ image: '' });
+      }
+    },
+    onRemove: () => {
+      form.setFieldsValue({ image: '' });
+    },
+    maxCount: 1,
+  };
+
   return (
     <>
       <Modal
@@ -92,7 +139,24 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
         onCancel={() => setIsServiceDetailModalVisible(false)}
         footer={null}
       >
-        <Form form={form} onFinish={handleSaveServiceDetail} layout="vertical">
+        <Form
+          form={form}
+          onFinish={(values) => {
+            // Convert estimatedTime sang tiếng Anh trước khi submit
+            let estimatedTimeEn = values.estimatedTime;
+            if (estimatedTimeEn.includes('phút')) {
+              estimatedTimeEn = estimatedTimeEn.replace('phút', 'minutes').replace('~', '').trim();
+            }
+            if (estimatedTimeEn.includes('giờ')) {
+              estimatedTimeEn = estimatedTimeEn.replace('giờ', 'hours').replace('~', '').trim();
+            }
+            values.estimatedTime = estimatedTimeEn;
+            // Always get image from form value (like name)
+            values.image = form.getFieldValue('image');
+            handleSaveServiceDetail(values);
+          }}
+          layout="vertical"
+        >
           <Form.Item
             label="Tên dịch vụ"
             name="name"
@@ -118,13 +182,27 @@ const PetServiceModals: React.FC<PetServiceModalsProps> = ({
           </Form.Item>
 
           <Form.Item
-            label="Thời gian ước tính"
+            label="Ảnh dịch vụ"
+            name="image"
+          >
+            <Upload {...uploadProps}>
+              {fileList.length >= 1 ? null : (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <PlusOutlined style={{ fontSize: 24 }} />
+                  <div style={{ marginTop: 8, fontSize: 12, color: '#999' }}>Tải Ảnh</div>
+                </div>
+              )}
+            </Upload>
+          </Form.Item>
+
+          <Form.Item
+            label="Thời gian dự kiến (hiển thị)"
             name="estimatedTime"
             rules={[
-              { required: true, message: "Vui lòng nhập thời gian ước tính!" },
+              { required: true, message: "Vui lòng nhập thời gian dự kiến!" },
             ]}
           >
-            <Input />
+            <Input placeholder="VD: 40 - 60 phút" />
           </Form.Item>
 
           <Form.Item

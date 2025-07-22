@@ -14,10 +14,10 @@ export const petServiceColumns = (handleUpdate: (record: PetServiceDetail) => vo
         key: "description",
     },
     {
-        title: "Giá",
+        title: "Giá (VNĐ)",
         dataIndex: "amount",
         key: "amount",
-        render: (amount: number) => <span>{amount.toLocaleString('vi-VN')}đ</span>,
+        render: (amount: number) => <span>{amount.toLocaleString('vi-VN')}</span>,
     },
     {
         title: "Cân nặng thú cưng",

@@ -2,9 +2,10 @@ import { Typography, Tabs, Table, DatePicker, Input, Button, Space, Flex, Card, 
 import { useEffect, useState } from 'react';
 import type { TabsProps, TableProps } from 'antd';
 import dayjs from 'dayjs';
-import BookingDetailScreen from './BookingDetailScreen';
-import { fetchBookings, IBookingItem, IBookingResponse } from '../../services/booking.service';
+import { fetchBookings, IBookingItem, IBookingResponse, updateBookingStatus } from '../../services/booking.service';
 import { DownOutlined } from '@ant-design/icons';
+import { useQueryClient } from '@tanstack/react-query';
+import { message } from 'antd';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -42,35 +43,44 @@ const BookingManagementScreen = () => {
     const screens = useBreakpoint();
     const [activeTab, setActiveTab] = useState('all');
     const [bookings, setBookings] = useState<IBookingItem[]>([]);
-    const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
-    const [selectedBooking, setSelectedBooking] = useState<IBookingItem | null>(null);
-    const [form] = Form.useForm();
-    const [showDetail, setShowDetail] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [totalCount, setTotalCount] = useState(0);
+    const queryClient = useQueryClient();
+
+    const fetchData = async () => {
+        setIsLoading(true);
+        try {
+            let statusParam: number | undefined = undefined;
+            if (activeTab === 'pending') statusParam = 1;
+            else if (activeTab === 'confirmed') statusParam = 2;
+            else if (activeTab === 'completed') statusParam = 3;
+            else if (activeTab === 'cancelled') statusParam = 4;
+            const res = await fetchBookings(1, 10, statusParam);
+            setBookings(res.items);
+            setTotalCount(res.totalItemsCount);
+        } catch (e) {
+            setBookings([]);
+        }
+        setIsLoading(false);
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            try {
-                const res = await fetchBookings('3fa85f64-5717-4562-b3fc-2c963f66afa6', 1, 10);
-                setBookings(res.items);
-                setTotalCount(res.totalItemsCount);
-            } catch (e) {
-                setBookings([]);
-            }
-            setIsLoading(false);
-        };
         fetchData();
-    }, []);
+    }, [activeTab]);
 
     useEffect(() => {
         document.title = 'Quản lý Đặt lịch';
     }, []);
 
-    const handleViewDetails = (booking: IBookingItem) => {
-        setSelectedBooking(booking);
-        setShowDetail(true);
+    const handleUpdateBookingStatus = async (id: string, status: number) => {
+        try {
+            await updateBookingStatus(id, status);
+            message.success('Cập nhật trạng thái thành công');
+            // Refetch lại danh sách
+            fetchData();
+        } catch (e) {
+            message.error('Cập nhật trạng thái thất bại');
+        }
     };
 
     const baseColumns: TableProps<IBookingItem>['columns'] = [
@@ -92,7 +102,9 @@ const BookingManagementScreen = () => {
                         <div key={idx} style={{ marginBottom: 4 }}>
                             <b>{pws.pet.name}</b> ({pws.pet.petType ? 'Chó' : 'Mèo'} - {pws.pet.color})<br />
                             {pws.services.map(s => (
-                                <Tag key={s.id} style={{ marginTop: 2, marginBottom: 2 }}>{s.serviceDetailName}</Tag>
+                                <div key={s.id} style={{ marginTop: 2, marginBottom: 2, display: 'inline-block', fontSize: 13 }}>
+                                    {s.serviceDetailName} - {s.serviceName}
+                                </div>
                             ))}
                         </div>
                     ))}
@@ -105,12 +117,17 @@ const BookingManagementScreen = () => {
             key: 'bookingTime',
             width: 150,
             responsive: ['sm'],
-            render: (bookingTime: string) => (
-                <span>{new Date(bookingTime).toLocaleString('vi-VN')}</span>
-            ),
+            render: (bookingTime: string) => {
+                if (!bookingTime) return '';
+                const [d, t] = bookingTime.split('T');
+                const [year, month, day] = d.split('-');
+                const match = t.match(/(\d{2}:\d{2})/);
+                const time = match ? match[1] : '';
+                return <span>{`${day}/${month}/${year} ${time}`}</span>;
+            },
         },
         {
-            title: 'Tổng tiền (VND)',
+            title: 'Tổng tiền (VNĐ)',
             dataIndex: 'totalPrice',
             key: 'totalPrice',
             width: 120,
@@ -144,7 +161,21 @@ const BookingManagementScreen = () => {
             render: (_: any, record: IBookingItem) => {
                 const menu = (
                     <Menu>
-                        <Menu.Item key="detail" onClick={() => handleViewDetails(record)}>Xem chi tiết</Menu.Item>
+                        {record.status === 1 && (
+                            <>
+                                <Menu.Item key="start" onClick={() => handleUpdateBookingStatus(record.bookingId, 2)}>
+                                    Tiến hành dịch vụ
+                                </Menu.Item>
+                                <Menu.Item key="cancel" onClick={() => handleUpdateBookingStatus(record.bookingId, 4)}>
+                                    Hủy
+                                </Menu.Item>
+                            </>
+                        )}
+                        {record.status === 2 && (
+                            <Menu.Item key="done" onClick={() => handleUpdateBookingStatus(record.bookingId, 3)}>
+                                Xác nhận hoàn thành
+                            </Menu.Item>
+                        )}
                     </Menu>
                 );
                 return (
@@ -181,43 +212,9 @@ const BookingManagementScreen = () => {
 
     const handleTabChange = (key: string) => {
         setActiveTab(key);
-        // TODO: Fetch bookings based on the selected tab key
     };
 
-    const filteredData = bookings.filter(booking => {
-        if (activeTab === 'all') return true;
-        // ... (filtering logic)
-    });
-
-    if (showDetail && selectedBooking) {
-        const bookingDetailProps = {
-            id: selectedBooking.bookingId,
-            customerInfo: {
-                name: selectedBooking.userName,
-                phone: selectedBooking.userPhone,
-                address: (selectedBooking as any).userAddress || '',
-            },
-            service: {
-                name: selectedBooking.petWithServices?.[0]?.services?.[0]?.serviceDetailName || '',
-                price: selectedBooking.totalPrice,
-                duration: '',
-                image: '',
-            },
-            petInfo: {
-                name: selectedBooking.petWithServices?.[0]?.pet?.name || '',
-                type: String(selectedBooking.petWithServices?.[0]?.pet?.petType || ''),
-                breed: (selectedBooking.petWithServices?.[0]?.pet as any)?.breed || '',
-                age: (selectedBooking.petWithServices?.[0]?.pet as any)?.age || 0,
-            },
-            totalAmount: selectedBooking.totalPrice,
-            status: String(selectedBooking.status),
-            bookingDate: selectedBooking.bookingTime,
-            bookingTime: selectedBooking.bookingTime,
-            paymentMethod: (selectedBooking as any).paymentMethod || '',
-            note: (selectedBooking as any).note || '',
-        };
-        return <BookingDetailScreen booking={bookingDetailProps} />;
-    }
+    const filteredData = bookings; // Đã filter bằng API nên không cần filter ở client nữa
 
     return (
         <div style={{ padding: screens.md ? '24px' : '12px' }}>

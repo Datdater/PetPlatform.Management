@@ -64,7 +64,7 @@ const StoreInfoFormItem = (propss: StoreInforFormItemProps) => {
       </Form.Item>
 
       <Form.Item
-        label="Store Logo"
+        label="Logo Cửa hàng"
         name="logoUrl"
         style={{ marginBottom: 20, textAlign: "left" }}
       >
@@ -91,7 +91,7 @@ const StoreInfoFormItem = (propss: StoreInforFormItemProps) => {
       </Form.Item>
 
       <Form.Item
-        label="Store Banner"
+        label="Banner Cửa hàng"
         name="bannerUrl"
         style={{ marginBottom: 0, textAlign: "left" }}
       >

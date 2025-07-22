@@ -32,7 +32,7 @@ const AddStoreScreen = () => {
     },
     {
       title: "Thông tin thuế",
-      content: <StoreFaxFormItem />,
+      content: <StoreFaxFormItem form={form} />,
     },
     {
       title: "Thông tin định danh",
@@ -90,6 +90,23 @@ const AddStoreScreen = () => {
                   ...values,
                   ...formValues,
                 };
+                
+                // Thay thế mã code bằng tên địa chỉ
+                if (data.businessAddressProvinceName) {
+                  data.businessAddressProvince = data.businessAddressProvinceName;
+                }
+                if (data.businessAddressDistrictName) {
+                  data.businessAddressDistrict = data.businessAddressDistrictName;
+                }
+                if (data.businessAddressWardName) {
+                  data.businessAddressWard = data.businessAddressWardName;
+                }
+                
+                // Xóa các trường ẩn không cần thiết
+                delete data.businessAddressProvinceName;
+                delete data.businessAddressDistrictName;
+                delete data.businessAddressWardName;
+                
                 console.log("Form value here: ", data);
                 mutate(data);
               }}
@@ -126,13 +143,13 @@ const AddStoreScreen = () => {
                     });
                 }}
               >
-                Next
+                Bước sau
               </Button>
             )}
 
             {current === steps.length - 2 && (
               <Button type="primary" onClick={() => form.submit()}>
-                Done
+                Hoàn thành 
               </Button>
             )}
 

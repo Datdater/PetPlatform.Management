@@ -25,7 +25,7 @@ export interface IAuthState {
   logout: () => void;
   clearError: () => void; // Method to clear any stored errors
   updateProfile: (
-    id: number,
+    id: string,
     email: string, 
     name: string, 
     phoneNumber: string

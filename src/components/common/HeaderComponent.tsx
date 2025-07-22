@@ -23,16 +23,21 @@ const HeaderComponent = () => {
   const [visibleModalNotification, setVisibleModalNotification] =
     useState<boolean>(false);
 
-  const { logout } = useAuthStore();
+  const { logout, user } = useAuthStore();
   const navigate = useNavigate();
   const items: MenuProps["items"] = [
-    {
-      key: "profile",
-      label: "Profile",
-      onClick: () => {
-        navigate("/profile");
-      },
-    },
+    // Chỉ hiển thị mục 'Thông tin cửa hàng' nếu user không phải là Admin
+    ...(user?.role !== "Admin"
+      ? [
+          {
+            key: "profile",
+            label: "Thông tin cửa hàng",
+            onClick: () => {
+              navigate("/profile");
+            },
+          },
+        ]
+      : []),
     {
       key: "logout",
       label: "Đăng xuất",
@@ -58,21 +63,28 @@ const HeaderComponent = () => {
       </Col>
       <Col span={12} style={{ textAlign: "right" }}>
         <Space>
-          <Button
-            onClick={() => setVisibleModalNotification(true)}
-            type="text"
-            icon={
-              <Badge count={4}>
-                <Notification size={22} color={colors.gray600} />
-              </Badge>
-            }
-          />
-          <Dropdown menu={{ items }}>
-            <Avatar
-              src="https://png.pngtree.com/png-vector/20190710/ourlarge/pngtree-user-vector-avatar-png-image_1541962.jpg"
-              alt="user avatar"
-              size={40}
+          {user?.role !== "Admin" && (
+            <Button
+              onClick={() => setVisibleModalNotification(true)}
+              type="text"
+              icon={
+                <Badge count={4}>
+                  <Notification size={22} color={colors.gray600} />
+                </Badge>
+              }
             />
+          )}
+          <Dropdown menu={{ items }}>
+            <Space>
+            {user?.name && (
+                <span style={{ fontWeight: 700 }}>{user.name}</span>
+              )}
+              <Avatar
+                src={user?.storeLogo || "https://png.pngtree.com/png-vector/20190710/ourlarge/pngtree-user-vector-avatar-png-image_1541962.jpg"}
+                alt="user avatar"
+                size={40}
+              />
+            </Space>
           </Dropdown>
         </Space>
       </Col>

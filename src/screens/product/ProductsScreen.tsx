@@ -72,7 +72,7 @@ const ProductsScreen = () => {
           <div>
             <Button
               type="primary"
-              style={{ marginLeft: "auto", marginRight: 10 }}
+              style={{ marginLeft: "auto", marginRight: 10, background: '#d48806', borderColor: '#d48806' }}
               icon={<AiOutlinePlus />}
               onClick={() => navigate("add-product")}
             >
@@ -85,6 +85,7 @@ const ProductsScreen = () => {
                 icon={<AiOutlineReload />}
                 onClick={() => fetchProducts(currentPage, pageSize)}
                 loading={loading}
+                style={{ background: '#d48806', borderColor: '#d48806' }}
               />
             </Tooltip>
           </div>
@@ -97,25 +98,36 @@ const ProductsScreen = () => {
         ) : (
           <Row gutter={[16, 16]}>
             {products.map((product) => (
-              <Col xs={24} sm={12} md={8} key={product.id}>
+              <Col xs={24} sm={12} md={6} key={product.id}>
                 <Card
                   hoverable
+                  style={{ cursor: 'pointer', height: 340, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflow: 'hidden' }}
                   cover={
                     <Image
                       alt={product.name}
-                      src={product.productImage}
-                      style={{ height: 200, objectFit: 'cover' }}
+                      src={product.productImage || 'https://via.placeholder.com/300x200'}
+                      style={{ height: 160, objectFit: 'cover', borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
                     />
                   }
                   onClick={() => handleViewProduct(product.id)}
-                  style={{ cursor: 'pointer' }}
                 >
                   <Card.Meta
-                    title={product.name}
+                    title={
+                      <>
+                        {product.categoryName && (
+                          <Tag color="blue" style={{ fontWeight: 600, fontSize: 14, borderRadius: 8, marginBottom: 4, display: 'inline-block' }}>
+                            {product.categoryName}
+                          </Tag>
+                        )}
+                        <div style={{ fontWeight: 600, fontSize: 17, minHeight: 32, maxHeight: 32, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{product.name}</div>
+                      </>
+                    }
                     description={
                       <Space direction="vertical" size="small">
                         <div>
-                          <Tag color="green">{product.storeName}</Tag>
+                          <Typography.Text style={{ color: '#d48806', fontWeight: 700, fontSize: 16 }}>
+                            {product.price?.toLocaleString('vi-VN')} VNĐ
+                          </Typography.Text>
                         </div>
                         <div>
                           <Rate disabled defaultValue={product.starAverage} style={{ fontSize: 14 }} />
@@ -126,11 +138,6 @@ const ProductsScreen = () => {
                         <div>
                           <Typography.Text type="secondary">
                             Đã bán: {product.sold}
-                          </Typography.Text>
-                        </div>
-                        <div>
-                          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                            {product.storeProvince}, {product.storeDistrict}, {product.storeWard}, {product.storeStreet}
                           </Typography.Text>
                         </div>
                       </Space>

@@ -15,6 +15,7 @@ import {
   Divider,
   Spin,
   UploadProps,
+  UploadFile,
 } from "antd";
 import {
   MinusCircleOutlined,
@@ -34,12 +35,14 @@ interface AttributeDefinition {
 }
 
 interface ProductVariant {
+  id?: string;
   attributes: Record<string, string>;  // key là tên thuộc tính, value là giá trị
   price: number;
   stock: number;
 }
 
 interface ProductImage {
+  id?: string;
   imageUrl: string;
   isMain: boolean;
 }
@@ -77,50 +80,10 @@ interface IAddProduct {
 }
 
 interface ProductFormProps {
-  onSubmit: (values: IAddProduct) => void;
-  initialValues?: Partial<IAddProduct>;
+  onSubmit: (values: any) => void;
+  initialValues?: Partial<any>;
   loading?: boolean;
 }
-
-// Helper function to generate all combinations of attributes
-const generateVariantCombinations = (attributesData: any[]) => {
-  if (!attributesData || attributesData.length === 0) return [];
-
-  const validAttributes = attributesData
-    .filter(attr => attr.name && attr.values && attr.values.length > 0)
-    .map(attr => ({
-      name: attr.name,
-      values: attr.values.filter((val: any) => val.value && val.value.trim())
-    }))
-    .filter(attr => attr.values.length > 0);
-
-  if (validAttributes.length === 0) return [];
-
-  // Generate all combinations
-  const combinations: any[] = [];
-  
-  const generateCombos = (index: number, currentCombo: any, currentAttributes: any) => {
-    if (index === validAttributes.length) {
-      combinations.push({
-        attributes: currentAttributes,
-        price: currentCombo.price || 0,
-        stock: currentCombo.stock || 0
-      });
-      return;
-    }
-
-    const currentAttr = validAttributes[index];
-    currentAttr.values.forEach((val: any) => {
-      generateCombos(index + 1, val, {
-        ...currentAttributes,
-        [currentAttr.name]: val.value
-      });
-    });
-  };
-
-  generateCombos(0, {}, {});
-  return combinations;
-};
 
 const ProductForm: React.FC<ProductFormProps> = ({
   onSubmit,
@@ -128,7 +91,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   loading = false,
 }) => {
   const [form] = Form.useForm<ProductFormValues>();
-  const [fileList, setFileList] = useState<any[]>([]);
+  const [fileList, setFileList] = useState<(UploadFile<any> & { id?: string })[]>([]);
   const [description, setDescription] = useState<string>(initialValues?.description || "");
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
@@ -140,6 +103,22 @@ const ProductForm: React.FC<ProductFormProps> = ({
       .catch(() => setCategories([]))
       .finally(() => setCategoriesLoading(false));
   }, []);
+
+  // Handle initialValues for images
+  useEffect(() => {
+    if (initialValues?.images && initialValues.images.length > 0) {
+      const initialFileList = initialValues.images.map((img: any, index: number) => ({
+        uid: `existing-${index}`,
+        name: `image-${index}`,
+        status: 'done' as const,
+        url: img.imageUrl,
+        response: img.imageUrl,
+        isMain: img.isMain,
+        id: img.id // giữ lại id nếu có
+      }));
+      setFileList(initialFileList);
+    }
+  }, [initialValues?.images]);
 
   const uploadProps: UploadProps = {
     action: `${import.meta.env.VITE_BACKEND_URL}/image`,
@@ -161,35 +140,30 @@ const ProductForm: React.FC<ProductFormProps> = ({
       // Update form images field with uploaded URLs
       const images = fl
         .filter(f => f.status === "done" && f.response)
-        .map((f, idx) => ({ imageUrl: f.response, isMain: idx === 0 }));
+        .map((f, idx) => {
+          const fileWithId = f as UploadFile<any> & { id?: string };
+          return { imageUrl: fileWithId.response, isMain: idx === 0, id: fileWithId.id };
+        });
       form.setFieldsValue({ images });
     },
     onRemove(file) {
       const newFileList = fileList.filter(f => f.uid !== file.uid);
       setFileList(newFileList);
       // Update form images field
-      const images = newFileList
+      const images2 = newFileList
         .filter(f => f.status === "done" && f.response)
-        .map((f, idx) => ({ imageUrl: f.response, isMain: idx === 0 }));
-      form.setFieldsValue({ images });
+        .map((f, idx) => {
+          const fileWithId = f as UploadFile<any> & { id?: string };
+          return { imageUrl: fileWithId.response, isMain: idx === 0, id: fileWithId.id };
+        });
+      form.setFieldsValue({ images: images2 });
     },
   };
 
   const handleAddAttribute = () => {
     const currentAttributes = form.getFieldValue('attributesDefinition') || [];
-    const currentVariants = form.getFieldValue('variants') || [];
-    
-    // Thêm thuộc tính mới
     form.setFieldsValue({
       attributesDefinition: [...currentAttributes, { name: '', values: [] }],
-      // Cập nhật tất cả các biến thể hiện có với giá trị rỗng cho thuộc tính mới
-      variants: currentVariants.map((variant: ProductVariant) => ({
-        ...variant,
-        attributes: {
-          ...variant.attributes,
-          '': ''  // Thêm thuộc tính mới với giá trị rỗng
-        }
-      }))
     });
   };
 
@@ -200,38 +174,79 @@ const ProductForm: React.FC<ProductFormProps> = ({
     
     // Xóa thuộc tính
     const newAttributes = currentAttributes.filter((_: any, i: number) => i !== index);
+    
+    // Cập nhật tất cả các biến thể hiện có, xóa thuộc tính bị xóa
+    const updatedVariants = currentVariants.map((variant: ProductVariant) => {
+      const newAttributes = { ...variant.attributes };
+      if (attributeToRemove) {
+        delete newAttributes[attributeToRemove];
+      }
+      return {
+        ...variant,
+        attributes: newAttributes
+      };
+    });
+    
     form.setFieldsValue({
       attributesDefinition: newAttributes,
-      // Cập nhật tất cả các biến thể hiện có, xóa thuộc tính bị xóa
-      variants: currentVariants.map((variant: ProductVariant) => {
-        const newAttributes = { ...variant.attributes };
-        delete newAttributes[attributeToRemove];
-        return {
-          ...variant,
-          attributes: newAttributes
-        };
-      })
+      variants: updatedVariants
     });
   };
 
   const handleSubmit = (values: any) => {
-    // Validate images
-    if (!fileList || fileList.length === 0) {
+    // Validate images - allow existing images from initialValues
+    const hasImages = fileList && fileList.length > 0;
+    if (!hasImages) {
       message.error("Vui lòng thêm ít nhất một hình ảnh");
       return;
     }
+
+    // Validate variants - đảm bảo không có thuộc tính rỗng
+    const cleanedVariants = (values.variants || []).map((variant: ProductVariant) => {
+      const cleanedAttributes: Record<string, string> = {};
+      
+      // Chỉ giữ lại những thuộc tính có tên và giá trị hợp lệ
+      Object.entries(variant.attributes || {}).forEach(([key, value]) => {
+        if (key && key.trim() && value && value.trim()) {
+          cleanedAttributes[key.trim()] = value.trim();
+        }
+      });
+
+      // Giữ lại id nếu có
+      return {
+        id: variant.id,
+        attributes: cleanedAttributes,
+        price: variant.price || 0,
+        stock: variant.stock || 0
+      };
+    });
+
     const formData = {
       ...values,
       description: description,
-      images: fileList.map(f => ({ imageUrl: f.url, isMain: f.isMain })),
-      variants: values.variants?.map((variant: ProductVariant) => ({
-        attributes: variant.attributes,
-        price: variant.price,
-        stock: variant.stock
-      })) || []
+      images: fileList
+        .filter(f => f.status === "done")
+        .map((f, idx) => {
+          const fileWithId = f as UploadFile<any> & { id?: string };
+          return {
+            id: fileWithId.id,
+            imageUrl: fileWithId.response || fileWithId.url,
+            isMain: idx === 0
+          };
+        }),
+      variants: cleanedVariants
     };
+    
     onSubmit(formData);
   };
+
+  const getCurrentAttributeNames = () => {
+    const attributesDefinition = form.getFieldValue('attributesDefinition') || [];
+    return attributesDefinition
+      .filter((attr: AttributeDefinition) => attr.name && attr.name.trim())
+      .map((attr: AttributeDefinition) => attr.name.trim());
+  };
+
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
@@ -270,12 +285,12 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <Form.Item
                 label="Mô Tả"
                 required
-                validateStatus={(!description || description.length === 0) ? "error" : (description.length > 2000 ? "error" : "success")}
+                validateStatus={(!description || description.length === 0) ? "error" : (description.length > 5000 ? "error" : "success")}
                 help={
                   !description || description.length === 0
                     ? "Vui lòng nhập mô tả sản phẩm"
-                    : description.length > 2000
-                    ? "Mô tả không được vượt quá 2000 ký tự"
+                    : description.length > 5000
+                    ? "Mô tả không được vượt quá 5000 ký tự"
                     : null
                 }
               >
@@ -424,163 +439,176 @@ const ProductForm: React.FC<ProductFormProps> = ({
           </Row>
         </Card>
 
-        {/* Product Attributes & Variants */}
+        {/* Product Attributes Definition */}
         <Card
           className="shadow-md hover:shadow-lg transition-shadow"
           title={
             <Space>
               <Title level={4} style={{ margin: 0 }}>
-                Thuộc Tính Sản Phẩm
+                Định Nghĩa Thuộc Tính
               </Title>
             </Space>
           }
         >
           <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
-            Định nghĩa các thuộc tính và giá trị của sản phẩm. Mỗi tổ hợp thuộc tính sẽ có giá và số lượng riêng.
+            Định nghĩa các thuộc tính sản phẩm (ví dụ: Size, Màu sắc, v.v.)
           </Text>
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <Form.List name="attributesDefinition">
-                    {(attrFields, { add: addAttribute, remove: removeAttribute }) => (
-                      <>
-                        {attrFields.map(({ key, name, ...restField }) => (
-                          <th key={key} style={{ padding: '8px', border: '1px solid #d9d9d9', backgroundColor: '#fafafa' }}>
-                            <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+          <Form.List name="attributesDefinition">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <Card key={key} size="small" style={{ marginBottom: 16 }}>
+                    <Row gutter={16} align="middle">
+                      <Col span={20}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'name']}
+                          label="Tên thuộc tính"
+                          rules={[{ required: true, message: 'Vui lòng nhập tên thuộc tính' }]}
+                        >
+                          <Input placeholder="Ví dụ: Size, Màu sắc, Chất liệu..." />
+                        </Form.Item>
+                      </Col>
+                      <Col span={4}>
+                        <Button 
+                          type="text" 
+                          danger 
+                          icon={<MinusCircleOutlined />}
+                          onClick={() => {
+                            remove(name);
+                            handleRemoveAttribute(name);
+                          }}
+                        >
+                          Xóa
+                        </Button>
+                      </Col>
+                    </Row>
+                  </Card>
+                ))}
+                <Button 
+                  type="dashed" 
+                  onClick={() => add({ name: '', values: [] })}
+                  icon={<PlusOutlined />}
+                  style={{ width: '100%' }}
+                >
+                  Thêm thuộc tính
+                </Button>
+              </>
+            )}
+          </Form.List>
+        </Card>
+
+        {/* Product Variants */}
+        <Card
+          className="shadow-md hover:shadow-lg transition-shadow"
+          title={
+            <Space>
+              <Title level={4} style={{ margin: 0 }}>
+                Biến Thể Sản Phẩm
+              </Title>
+            </Space>
+          }
+        >
+          <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+            Tạo các biến thể với từng tổ hợp thuộc tính, giá và số lượng riêng biệt.
+          </Text>
+
+          <Form.List name="variants">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <Card key={key} size="small" style={{ marginBottom: 16, border: '1px solid #f0f0f0' }}>
+                    <Row gutter={16}>
+                      {/* Dynamic attribute fields */}
+                      <Col span={14}>
+                        <Row gutter={8}>
+                          {getCurrentAttributeNames().map((attrName: string) => (
+                            <Col span={8} key={attrName}>
                               <Form.Item
                                 {...restField}
-                                name={[name, 'name']}
-                                rules={[{ required: true, message: 'Nhập tên thuộc tính' }]}
-                                style={{ margin: 0, flex: 1 }}
+                                name={[name, 'attributes', attrName]}
+                                label={attrName}
+                                rules={[{ required: true, message: `Nhập giá trị cho ${attrName}` }]}
                               >
-                                <Input placeholder={`Thuộc tính ${name + 1}`} />
+                                <Input placeholder={`Giá trị ${attrName}`} />
                               </Form.Item>
-                              <Space>
-                                <Button 
-                                  type="text" 
-                                  danger 
-                                  icon={<MinusCircleOutlined />}
-                                  onClick={() => handleRemoveAttribute(name)}
-                                />
-                                {name === attrFields.length - 1 && (
-                                  <Button 
-                                    type="text" 
-                                    icon={<PlusOutlined />}
-                                    onClick={handleAddAttribute}
-                                  />
-                                )}
-                              </Space>
-                            </Space>
-                          </th>
-                        ))}
-                        {attrFields.length === 0 && (
-                          <th style={{ padding: '8px', border: '1px solid #d9d9d9', backgroundColor: '#fafafa' }}>
-                            <Button 
-                              type="dashed" 
-                              onClick={handleAddAttribute}
-                              icon={<PlusOutlined />}
-                              style={{ width: '100%' }}
-                            >
-                              Thêm thuộc tính
-                            </Button>
-                          </th>
-                        )}
-                        <th style={{ padding: '8px', border: '1px solid #d9d9d9', backgroundColor: '#fafafa' }}>
-                          <Text strong>Giá</Text>
-                        </th>
-                        <th style={{ padding: '8px', border: '1px solid #d9d9d9', backgroundColor: '#fafafa' }}>
-                          <Text strong>Số lượng</Text>
-                        </th>
-                      </>
-                    )}
-                  </Form.List>
-                </tr>
-              </thead>
-              <tbody>
-                <Form.List name="variants">
-                  {(fields, { add, remove }) => (
-                    <>
-                      {fields.map(({ key, name, ...restField }) => (
-                        <tr key={key}>
-                          {form.getFieldValue('attributesDefinition')?.map((attr: AttributeDefinition, index: number) => (
-                            <td key={index} style={{ padding: '8px', border: '1px solid #d9d9d9' }}>
-                              <Form.Item
-                                {...restField}
-                                name={[name, 'attributes', attr.name]}
-                                rules={[{ required: true, message: 'Nhập giá trị' }]}
-                                style={{ margin: 0 }}
-                              >
-                                <Input placeholder="Giá trị" />
-                              </Form.Item>
-                            </td>
+                            </Col>
                           ))}
-                          <td style={{ padding: '8px', border: '1px solid #d9d9d9' }}>
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'price']}
-                              rules={[{ required: true, message: 'Nhập giá' }]}
-                              style={{ margin: 0 }}
-                            >
-                              <InputNumber
-                                min={0}
-                                step={0.01}
-                                precision={2}
-                                style={{ width: '100%' }}
-                                formatter={(value) => `₫ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                              />
-                            </Form.Item>
-                          </td>
-                          <td style={{ padding: '8px', border: '1px solid #d9d9d9' }}>
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'stock']}
-                              rules={[{ required: true, message: 'Nhập số lượng' }]}
-                              style={{ margin: 0 }}
-                            >
-                              <InputNumber min={0} style={{ width: '100%' }} />
-                            </Form.Item>
-                          </td>
-                          <td style={{ padding: '8px', border: '1px solid #d9d9d9' }}>
-                            <Button 
-                              type="text" 
-                              danger 
-                              icon={<MinusCircleOutlined />}
-                              onClick={() => remove(name)}
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                      <tr>
-                        <td colSpan={3} style={{ padding: '8px', border: '1px solid #d9d9d9' }}>
-                          <Button 
-                            type="dashed" 
-                            onClick={() => {
-                              const attributesDefinition = form.getFieldValue('attributesDefinition') || [];
-                              const newVariant = {
-                                attributes: attributesDefinition.reduce((acc: Record<string, string>, attr: AttributeDefinition) => {
-                                  acc[attr.name] = '';
-                                  return acc;
-                                }, {}),
-                                price: 0,
-                                stock: 0
-                              };
-                              add(newVariant);
-                            }}
-                            icon={<PlusOutlined />}
+                        </Row>
+                      </Col>
+                      
+                      <Col span={4}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'price']}
+                          label="Giá"
+                          rules={[{ required: true, message: 'Nhập giá' }]}
+                        >
+                          <InputNumber
+                            min={0}
+                            step={0.01}
+                            precision={2}
                             style={{ width: '100%' }}
-                          >
-                            Thêm biến thể
-                          </Button>
-                        </td>
-                      </tr>
-                    </>
-                  )}
-                </Form.List>
-              </tbody>
-            </table>
-          </div>
+                            formatter={(value) => `₫ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                          />
+                        </Form.Item>
+                      </Col>
+                      
+                      <Col span={4}>
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'stock']}
+                          label="Số lượng"
+                          rules={[{ required: true, message: 'Nhập số lượng' }]}
+                        >
+                          <InputNumber min={0} style={{ width: '100%' }} />
+                        </Form.Item>
+                      </Col>
+                      
+                      <Col span={2}>
+                        <Form.Item label=" ">
+                          <Button 
+                            type="text" 
+                            danger 
+                            icon={<MinusCircleOutlined />}
+                            onClick={() => remove(name)}
+                          />
+                        </Form.Item>
+                      </Col>
+                    </Row>
+                  </Card>
+                ))}
+                
+                <Button 
+                  type="dashed" 
+                  onClick={() => {
+                    const attributeNames = getCurrentAttributeNames();
+                    const newVariant = {
+                      attributes: attributeNames.reduce((acc: Record<string, string>, attrName: string) => {
+                        acc[attrName] = '';
+                        return acc;
+                      }, {}),
+                      price: 0,
+                      stock: 0
+                    };
+                    add(newVariant);
+                  }}
+                  icon={<PlusOutlined />}
+                  style={{ width: '100%' }}
+                  disabled={getCurrentAttributeNames().length === 0}
+                >
+                  Thêm biến thể
+                </Button>
+                
+                {getCurrentAttributeNames().length === 0 && (
+                  <Text type="secondary" style={{ display: 'block', textAlign: 'center', marginTop: 8 }}>
+                    Vui lòng định nghĩa thuộc tính trước khi thêm biến thể
+                  </Text>
+                )}
+              </>
+            )}
+          </Form.List>
         </Card>
 
         {/* Images */}
@@ -605,7 +633,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
 
         <Form.Item>
           <Button type="primary" htmlType="submit" size="large" block loading={loading}>
-            Thêm Sản Phẩm
+            {initialValues ? 'Cập nhật sản phẩm' : 'Thêm Sản Phẩm'}
           </Button>
         </Form.Item>
       </Form>

@@ -1,7 +1,10 @@
 export interface IUser {
-  id: number;
+  id: string;
   email: string;
   password: string;
   name: string;
-  phoneNumber: string;
+  storeLogo: string | null;
+  avatar: string | null;
+  role: string | null;
+  phoneNumber: string | null;
 }

@@ -22,7 +22,7 @@ const SignUp = () => {
 
   const steps = [
     { title: "Thông tin cửa hàng", content: <StoreInfoFormItem form={form} /> },
-    { title: "Thông tin thuế", content: <StoreFaxFormItem /> },
+    { title: "Thông tin thuế", content: <StoreFaxFormItem form={form} /> },
     { title: "Thông tin định danh", content: <StoreIdentityFormItem form={form} /> },
     { title: "Thông tin đăng nhập", content: <StoreAccountFormItem /> },
     { title: "Hoàn tất", content: <StoreFinalCheck /> },
@@ -40,8 +40,26 @@ const SignUp = () => {
   };
 
   const handleFinish = async (values: any) => {
+    const data = { ...values, ...formValues };
+    
+    // Thay thế mã code bằng tên địa chỉ
+    if (data.businessAddressProvinceName) {
+      data.businessAddressProvince = data.businessAddressProvinceName;
+    }
+    if (data.businessAddressDistrictName) {
+      data.businessAddressDistrict = data.businessAddressDistrictName;
+    }
+    if (data.businessAddressWardName) {
+      data.businessAddressWard = data.businessAddressWardName;
+    }
+    
+    // Xóa các trường ẩn không cần thiết
+    delete data.businessAddressProvinceName;
+    delete data.businessAddressDistrictName;
+    delete data.businessAddressWardName;
+    
     mutate(
-      { ...values, ...formValues },
+      data,
       {
         onSuccess: async () => {
           const loginResult = await login(values.username, values.password);

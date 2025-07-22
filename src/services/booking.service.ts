@@ -11,6 +11,7 @@ export interface IPet {
 export interface IService {
   id: string;
   serviceDetailName: string;
+  serviceName: string;
   price: number;
 }
 
@@ -41,18 +42,30 @@ export interface IBookingResponse {
 }
 
 export const fetchBookings = async (
-  storeId: string,
   pageIndex = 1,
-  pageSize = 10
+  pageSize = 10,
+  status?: number
 ): Promise<IBookingResponse> => {
+  const params: any = {
+    PageNumber: pageIndex,
+    PageSize: pageSize,
+  };
+  if (status !== undefined) {
+    params.Status = status;
+  }
   const response = await feClient.get<IBookingResponse>(
     '/booking',
     {
-      params: {
-        PageNumber: pageIndex,
-        PageSize: pageSize,
-      },
+      params,
     }
   );
+  return response.data;
+};
+
+export const updateBookingStatus = async (id: string, bookingStatus: number) => {
+  const response = await feClient.patch(`/Booking/${id}`, {
+    id,
+    bookingStatus
+  });
   return response.data;
 }; 
