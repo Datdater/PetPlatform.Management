@@ -7,4 +7,5 @@ export interface IUser {
   avatar: string | null;
   role: string | null;
   phoneNumber: string | null;
+  storeId: string | null;
 }

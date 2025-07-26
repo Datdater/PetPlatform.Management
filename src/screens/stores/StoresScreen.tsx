@@ -32,43 +32,46 @@ const StoresScreen = () => {
   // Dữ liệu thống kê cửa hàng
   const totalReviews = 126;
   const totalServices = 3;
-  const totalProducts = 10;
-  const totalRevenue = 8000000; 
+  const totalProducts = 5;
 
-  // Dữ liệu giả cho doanh thu sản phẩm theo cửa hàng
+  // Dữ liệu giả cho doanh thu sản phẩm theo cửa hàng (giảm số tiền)
   const productRevenueData = [
-    { name: 'Pet Paradise', revenue: 25000000 },
-    { name: 'Happy Paws', revenue: 18500000 },
-    { name: 'Pet World', revenue: 32000000 },
-    { name: 'Animal Care', revenue: 15000000 },
+    { name: 'Pet Paradise', revenue: 500000 },
+    { name: 'Happy Paws', revenue: 350000 },
+    { name: 'Pet World', revenue: 700000 },
+    { name: 'Animal Care', revenue: 200000 },
   ];
 
-  // Dữ liệu giả cho doanh thu dịch vụ theo cửa hàng
+  // Dữ liệu giả cho doanh thu dịch vụ theo cửa hàng (giảm số tiền)
   const serviceRevenueData = [
-    { name: 'Pet Paradise', revenue: 14000000 },
-    { name: 'Happy Paws', revenue: 22000000 },
-    { name: 'Pet World', revenue: 18000000 },
-    { name: 'Animal Care', revenue: 28000000 },
+    { name: 'Pet Paradise', revenue: 300000 },
+    { name: 'Happy Paws', revenue: 400000 },
+    { name: 'Pet World', revenue: 250000 },
+    { name: 'Animal Care', revenue: 100000 },
   ];
 
-  // Dữ liệu cho LineChart - Doanh thu theo thời gian (13 tuần từ tháng 5-7/2025)
+  // Tính tổng doanh thu thực tế
+  const totalRevenue = [...productRevenueData, ...serviceRevenueData].reduce((sum, item) => sum + item.revenue, 0);
+
+  // Dữ liệu cho LineChart - Doanh thu theo thời gian (giảm số tiền)
   const revenueLineData = [
-    { date: new Date(2025, 4, 5), productRevenue: 3200000, serviceRevenue: 2800000 },
-    { date: new Date(2025, 4, 12), productRevenue: 2800000, serviceRevenue: 3500000 },
-    { date: new Date(2025, 4, 19), productRevenue: 4100000, serviceRevenue: 2200000 },
-    { date: new Date(2025, 4, 26), productRevenue: 3800000, serviceRevenue: 4200000 },
-    { date: new Date(2025, 5, 2), productRevenue: 2500000, serviceRevenue: 3100000 },
-    { date: new Date(2025, 5, 9), productRevenue: 4500000, serviceRevenue: 2900000 },
-    { date: new Date(2025, 5, 16), productRevenue: 3600000, serviceRevenue: 3800000 },
-    { date: new Date(2025, 5, 23), productRevenue: 4200000, serviceRevenue: 3200000 },
-    { date: new Date(2025, 5, 30), productRevenue: 2900000, serviceRevenue: 4100000 },
-    { date: new Date(2025, 6, 7), productRevenue: 3800000, serviceRevenue: 3500000 },
-    { date: new Date(2025, 6, 14), productRevenue: 4400000, serviceRevenue: 2800000 },
-    { date: new Date(2025, 6, 21), productRevenue: 3200000, serviceRevenue: 3900000 },
-    { date: new Date(2025, 6, 28), productRevenue: 4000000, serviceRevenue: 3400000 },
+    { date: new Date(2025, 4, 5), productRevenue: 120000, serviceRevenue: 80000 },
+    { date: new Date(2025, 4, 12), productRevenue: 90000, serviceRevenue: 110000 },
+    { date: new Date(2025, 4, 19), productRevenue: 150000, serviceRevenue: 70000 },
+    { date: new Date(2025, 4, 26), productRevenue: 130000, serviceRevenue: 120000 },
+    { date: new Date(2025, 5, 2), productRevenue: 80000, serviceRevenue: 90000 },
+    { date: new Date(2025, 5, 9), productRevenue: 160000, serviceRevenue: 60000 },
+    { date: new Date(2025, 5, 16), productRevenue: 110000, serviceRevenue: 130000 },
+    { date: new Date(2025, 5, 23), productRevenue: 140000, serviceRevenue: 90000 },
+    { date: new Date(2025, 5, 30), productRevenue: 70000, serviceRevenue: 150000 },
+    { date: new Date(2025, 6, 7), productRevenue: 120000, serviceRevenue: 110000 },
+    { date: new Date(2025, 6, 14), productRevenue: 170000, serviceRevenue: 80000 },
+    { date: new Date(2025, 6, 21), productRevenue: 90000, serviceRevenue: 140000 },
+    { date: new Date(2025, 6, 28), productRevenue: 130000, serviceRevenue: 100000 },
+    { date: new Date(2025, 7, 5), productRevenue: 200000, serviceRevenue: 180000 },
   ];
 
-  // Dữ liệu tăng trưởng đánh giá theo thời gian
+  // Dữ liệu tăng trưởng đánh giá theo thời gian (14 tuần từ tháng 5-7/2025, kết thúc 27/7)
   const reviewGrowthLineData = [
     { date: new Date(2025, 4, 5), reviews: 28 },
     { date: new Date(2025, 4, 12), reviews: 35 },
@@ -83,6 +86,7 @@ const StoresScreen = () => {
     { date: new Date(2025, 6, 14), reviews: 39 },
     { date: new Date(2025, 6, 21), reviews: 51 },
     { date: new Date(2025, 6, 28), reviews: 33 },
+    { date: new Date(2025, 7, 5), reviews: 67 },
   ];
 
   // Cấu hình cho Column chart (giống AdminDashboard)
@@ -189,7 +193,7 @@ const StoresScreen = () => {
           <Card>
             <Statistic
               title="Tổng doanh thu"
-              value={`${(totalRevenue / 1000000).toFixed(0)}tr`}
+              value={totalRevenue.toLocaleString()}
               prefix={<span role="img" aria-label="money" style={{ fontSize: 22 }}>💰</span>}
               suffix="₫"
             />

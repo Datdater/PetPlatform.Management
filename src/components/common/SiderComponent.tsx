@@ -5,10 +5,9 @@ import { Link, useNavigate } from "react-router";
 import { appInfo } from "../../constants/appInfos";
 import { colors } from "../../constants/colors";
 import { AiFillContainer, AiFillProduct, AiFillShop } from "react-icons/ai";
-import { AiOutlineTable } from "react-icons/ai";
+import { AiOutlineTable, AiOutlineUser, AiOutlineTransaction, AiOutlineOrderedList, AiOutlineBook } from "react-icons/ai";
 import { AiOutlineFileAdd } from "react-icons/ai";
 import { AiOutlineCalendar } from "react-icons/ai";
-import { AiOutlineBook } from "react-icons/ai";
 import { useAuthStore } from "../../stores/authStore";
 
 const { Sider } = Layout;
@@ -26,12 +25,27 @@ const SiderComponent = () => {
       {
         key: "users",
         label: <Link to={"/list-users"}>Quản lý người dùng</Link>,
-        icon: <AiOutlineTable size={20} />,
+        icon: <AiOutlineUser size={20} />,
       },
       {
         key: "stores",
         label: <Link to={"/list-stores"}>Quản lý cửa hàng</Link>,
         icon: <AiFillShop size={20} />,
+      },
+      {
+        key: "transactions",
+        label: <Link to={"/transactions"}>Các giao dịch</Link>,
+        icon: <AiOutlineTransaction size={20} />,
+      },
+      {
+        key: "orders",
+        label: <Link to={"/ad-orders"}>Danh sách Đơn hàng</Link>,
+        icon: <AiOutlineOrderedList size={20} />,
+      },
+      {
+        key: "bookings",
+        label: <Link to={"/ad-bookings"}>Danh sách Đặt lịch</Link>,
+        icon: <AiOutlineBook size={20} />,
       },
     ];
   } else {

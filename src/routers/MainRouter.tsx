@@ -21,6 +21,9 @@ import AdminDashboard from "../screens/admin/AdminDashboard";
 import { useAuthStore } from "../stores/authStore";
 import UsersManagementScreen from "../screens/users/UsersManagementScreen.tsx";
 import StoresManagementScreen from "../screens/stores/StoresManagementScreen.tsx";
+import TransactionsScreen from "../screens/TransactionsScreen";
+import OrdersScreen from "../screens/OrdersScreen";
+import BookingsScreen from "../screens/BookingsScreen";
 
 const { Content, Footer } = Layout;
 const MainRouter = () => {
@@ -72,6 +75,15 @@ const MainRouter = () => {
               
               {/* Booking Management route */}
               <Route path="/list-stores" element={<StoresManagementScreen />} />
+
+              {/* Transaction Management route */}
+              <Route path="/transactions" element={<TransactionsScreen />} />
+
+              {/* Admin Orders route */}
+              <Route path="/ad-orders" element={<OrdersScreen />} />
+
+              {/* Admin Bookings route */}
+              <Route path="/ad-bookings" element={<BookingsScreen />} />
 
               {/* Add more route here */}
             </Routes>

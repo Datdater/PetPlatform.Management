@@ -1,283 +1,262 @@
-import { Button, Card, Form, Input, message, Typography, Modal } from "antd";
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { Button, Card, Typography, Modal, Image, Descriptions, Spin, Row, Col, Alert, Form, Input, message } from "antd";
+import { useState } from "react";
 import { useAuthStore } from "../../stores/authStore";
+import { useQuery } from '@tanstack/react-query';
+import { getStore } from "../../services/store.service";
+import { IStore } from "../../types/IStore";
 
 const { Title } = Typography;
+const { TextArea } = Input;
 
 const Profile = () => {
-  const [form] = Form.useForm();
-  const [passwordForm] = Form.useForm();
-  const navigate = useNavigate();
-  const { user, updateProfile, changePassword } = useAuthStore();
-  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
-  const [isPasswordLoading, setIsPasswordLoading] = useState(false);
-  const [backendError, setBackendError] = useState<string | null>(null);
-  const [passwordChangeSuccess, setPasswordChangeSuccess] = useState(false); // New state
-  const [updateSuccess, setUpdateSuccess] = useState(false); // New state
+  const [isUpdateModalVisible, setIsUpdateModalVisible] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateForm] = Form.useForm();
+  const { user, changePassword } = useAuthStore();
 
-  // Existing useEffect for setting initial form values
-  useEffect(() => {
-    if (user) {
-      form.setFieldsValue({
-        email: user.email,
-        name: user.name,
-        phoneNumber: user.phoneNumber,
-      });
-    }
-  }, [user, form]);
+  // Fetch store data using react-query
+  const { data: store, isLoading, error, refetch } = useQuery<IStore>({
+    queryKey: ['store', user?.storeId],
+    queryFn: () => getStore(user?.storeId || ''),
+    enabled: !!user?.storeId,
+  });
 
-  // Profile update handler
-  const handleUpdate = async (values: {
-    name: string;
-    phoneNumber: string;
-  }) => {
-    const success = await updateProfile(
-      user!.id,
-      user!.email,
-      values.name,
-      values.phoneNumber
-    );
-
-    if (success) {
-      setUpdateSuccess(true); // Set success state
-      message.success("Profile updated successfully!");
-      navigate("/profile");
-    } else {
-      setUpdateSuccess(false); // Reset success state
-      message.error("Failed to update profile. Please try again.");
+  // Handle store update
+  const handleUpdateStore = async (values: any) => {
+    setIsUpdating(true);
+    try {
+      // TODO: Implement update store API call
+      // const response = await updateStore(store?.id || '', values);
+      console.log('Updating store with values:', values);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      message.success('Cập nhật thông tin cửa hàng thành công!');
+      setIsUpdateModalVisible(false);
+      refetch(); // Refresh store data
+    } catch (error) {
+      message.error('Cập nhật thất bại. Vui lòng thử lại!');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
-  // Password change handler
-  const handlePasswordChange = async (values: {
-    oldPassword: string;
-    newPassword: string;
-    confirmPassword: string;
-  }) => {
-    // Reset previous backend error and success state
-    setBackendError(null);
-    setPasswordChangeSuccess(false);
-
-    // Check if new passwords match
-    if (values.newPassword !== values.confirmPassword) {
-      message.error("New passwords do not match");
-      return;
-    }
-
-    setIsPasswordLoading(true);
-    const result = await changePassword(values.oldPassword, values.newPassword);
-    setIsPasswordLoading(false);
-
-    if (result.success) {
-      setPasswordChangeSuccess(true); // Set success state
-      message.success("Password changed successfully!");
-      setIsPasswordModalVisible(false);
-      passwordForm.resetFields();
-    } else {
-      // Set backend error for display
-      setBackendError(result.error || "Failed to change password");
-    }
-  };
-
-  // Password change modal
-  const renderPasswordChangeModal = () => (
+  // Update store modal
+  const renderUpdateModal = () => (
     <Modal
-      title="Change Password"
-      open={isPasswordModalVisible}
-      onCancel={() => {
-        setIsPasswordModalVisible(false);
-        setBackendError(null); // Clear error when modal is closed
-        setPasswordChangeSuccess(false); // Reset success state
-      }}
+      title="Cập nhật thông tin cửa hàng"
+      open={isUpdateModalVisible}
+      onCancel={() => setIsUpdateModalVisible(false)}
       footer={null}
+      width={800}
     >
-      {/* Success message - only show when passwordChangeSuccess is true */}
-      {passwordChangeSuccess && (
-        <div
-          style={{
-            color: "#52c41a",
-            backgroundColor: "#f6ffed",
-            border: "1px solid #52c41a",
-            padding: "10px",
-            borderRadius: "4px",
-            marginBottom: "16px",
-            textAlign: "center",
-          }}
-        >
-          Password changed successfully!
-        </div>
-      )}
-
-      {backendError && (
-        <div
-          style={{
-            color: "red",
-            backgroundColor: "#ffecec",
-            padding: "10px",
-            borderRadius: "4px",
-            marginBottom: "16px",
-            textAlign: "center",
-          }}
-        >
-          {backendError}
-        </div>
-      )}
       <Form
-        form={passwordForm}
+        form={updateForm}
         layout="vertical"
-        onFinish={handlePasswordChange}
+        onFinish={handleUpdateStore}
+        initialValues={store}
       >
-        <Form.Item
-          name="oldPassword"
-          label="Current Password"
-          rules={[
-            { required: true, message: "Please enter your current password" },
-          ]}
-        >
-          <Input.Password placeholder="Enter current password" />
-        </Form.Item>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              name="name"
+              label="Tên cửa hàng"
+              rules={[{ required: true, message: 'Vui lòng nhập tên cửa hàng!' }]}
+            >
+              <Input placeholder="Nhập tên cửa hàng" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="hotline"
+              label="Hotline"
+              rules={[{ required: true, message: 'Vui lòng nhập số hotline!' }]}
+            >
+              <Input placeholder="Nhập số hotline" />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item
-          name="newPassword"
-          label="New Password"
-          rules={[
-            { required: true, message: "Please enter a new password" },
-            { min: 8, message: "Password must be at least 8 characters" },
-          ]}
-        >
-          <Input.Password placeholder="Enter new password" />
-        </Form.Item>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item
+              name="faxEmail"
+              label="Email"
+              rules={[
+                { required: true, message: 'Vui lòng nhập email!' },
+                { type: 'email', message: 'Email không hợp lệ!' }
+              ]}
+            >
+              <Input placeholder="Nhập email" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item
+              name="faxCode"
+              label="Mã số thuế/ĐKKD"
+              rules={[{ required: true, message: 'Vui lòng nhập mã số thuế!' }]}
+            >
+              <Input placeholder="Nhập mã số thuế" />
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <Form.Item
-          name="confirmPassword"
-          label="Confirm New Password"
-          dependencies={["newPassword"]}
-          rules={[
-            { required: true, message: "Please confirm your new password" },
-            ({ getFieldValue }) => ({
-              validator(_, value) {
-                if (!value || getFieldValue("newPassword") === value) {
-                  return Promise.resolve();
-                }
-                return Promise.reject(new Error("Passwords do not match"));
-              },
-            }),
-          ]}
-        >
-          <Input.Password placeholder="Confirm new password" />
-        </Form.Item>
+        <Row gutter={16}>
+          <Col span={6}>
+            <Form.Item
+              name="businessAddressProvince"
+              label="Tỉnh/Thành phố"
+              rules={[{ required: true, message: 'Vui lòng chọn tỉnh/thành phố!' }]}
+            >
+              <Input placeholder="Tỉnh/Thành phố" />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item
+              name="businessAddressDistrict"
+              label="Quận/Huyện"
+              rules={[{ required: true, message: 'Vui lòng chọn quận/huyện!' }]}
+            >
+              <Input placeholder="Quận/Huyện" />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item
+              name="businessAddressWard"
+              label="Phường/Xã"
+              rules={[{ required: true, message: 'Vui lòng chọn phường/xã!' }]}
+            >
+              <Input placeholder="Phường/Xã" />
+            </Form.Item>
+          </Col>
+          <Col span={6}>
+            <Form.Item
+              name="businessAddressStreet"
+              label="Địa chỉ"
+              rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
+            >
+              <Input placeholder="Nhập địa chỉ" />
+            </Form.Item>
+          </Col>
+        </Row>
 
         <Form.Item>
           <Button
             type="primary"
             htmlType="submit"
-            loading={isPasswordLoading}
-            style={{ width: "100%" }}
+            loading={isUpdating}
+            style={{ width: '100%' }}
           >
-            Change Password
+            Cập nhật thông tin
           </Button>
         </Form.Item>
       </Form>
     </Modal>
   );
 
+  if (isLoading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (error || !store) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "100vh" }}>
+        <Card style={{ width: 400, padding: 24 }}>
+          <Title level={3} style={{ textAlign: "center", color: "red" }}>
+            Không thể tải thông tin cửa hàng
+          </Title>
+          <p style={{ textAlign: "center" }}>
+            Vui lòng thử lại sau.
+          </p>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        backgroundColor: "#f4f4f4",
-      }}
-    >
-      <Card style={{ width: 400, padding: 24, backgroundColor: "white" }}>
-        <Title level={3} style={{ textAlign: "center" }}>
-          Update Profile
-        </Title>
-        <Form
-          layout="vertical"
-          form={form}
-          onFinish={handleUpdate}
-          size="large"
-        >
-          {updateSuccess && (
-            <div
-              style={{
-                color: "#52c41a",
-                backgroundColor: "#f6ffed",
-                border: "1px solid #52c41a",
-                padding: "10px",
-                borderRadius: "4px",
-                marginBottom: "16px",
-                textAlign: "center",
-              }}
-            >
-              Updated profile successfully!
+    <div style={{ minHeight: "100vh", background: "#f4f4f4", padding: 32 }}>
+      <Row justify="center">
+        <Col xs={24} sm={20} md={16} lg={14} xl={12}>
+          <Card style={{ padding: 0, borderRadius: 12, overflow: 'hidden' }}>
+            {/* Banner */}
+            {store.bannerUrl && (
+              <div style={{ width: '100%', height: 180, overflow: 'hidden', background: '#eee' }}>
+                <Image src={store.bannerUrl} alt="Banner" style={{ width: '100%', height: 180, objectFit: 'cover' }} preview={false} />
+              </div>
+            )}
+            <div style={{ padding: 24 }}>
+              {/* Logo + Name */}
+              <Row gutter={24} align="middle" style={{ marginBottom: 24 }}>
+                <Col xs={24} sm={6} style={{ textAlign: 'center' }}>
+                  <Image
+                    src={store.logoUrl}
+                    alt="Logo"
+                    width={100}
+                    height={100}
+                    style={{ borderRadius: '50%', border: '2px solid #eee', objectFit: 'cover', background: '#fff' }}
+                    fallback="https://via.placeholder.com/100x100?text=No+Logo"
+                    preview={false}
+                  />
+                </Col>
+                <Col xs={24} sm={18}>
+                  <Title level={3} style={{ margin: 0 }}>{store.name}</Title>
+                  <div style={{ color: '#888', fontSize: 16, marginBottom: 8 }}>{store.businessType === 'personal' ? 'Cá nhân' : 'Doanh nghiệp'}</div>
+                  <div style={{ color: '#555' }}><b>Hotline:</b> {store.hotline}</div>
+                  <div style={{ color: '#555' }}><b>Email:</b> {store.faxEmail}</div>
+                </Col>
+              </Row>
+              {/* Details */}
+              <Descriptions column={1} bordered size="middle" style={{ marginBottom: 24 }}>
+                <Descriptions.Item label="Tên cửa hàng">{store.name}</Descriptions.Item>
+                <Descriptions.Item label="Mã số thuế/ĐKKD">{store.faxCode}</Descriptions.Item>
+                <Descriptions.Item label="Địa chỉ">
+                  {store.businessAddressStreet}, {store.businessAddressWard}, {store.businessAddressDistrict}, {store.businessAddressProvince}
+                </Descriptions.Item>
+              </Descriptions>
+              {/* Identity Images */}
+              <Row gutter={16} style={{ marginBottom: 24 }}>
+                <Col xs={24} sm={12}>
+                  <div style={{ marginBottom: 8, fontWeight: 500 }}>Mặt trước CMND/CCCD</div>
+                  <Image
+                    src={store.frontIdentityCardUrl}
+                    alt="Front ID"
+                    style={{ width: '100%', maxHeight: 180, objectFit: 'cover', border: '1px solid #eee' }}
+                    fallback="https://via.placeholder.com/300x180?text=No+Image"
+                  />
+                </Col>
+                <Col xs={24} sm={12}>
+                  <div style={{ marginBottom: 8, fontWeight: 500 }}>Mặt sau CMND/CCCD</div>
+                  <Image
+                    src={store.backIdentityCardUrl}
+                    alt="Back ID"
+                    style={{ width: '100%', maxHeight: 180, objectFit: 'cover', border: '1px solid #eee' }}
+                    fallback="https://via.placeholder.com/300x180?text=No+Image"
+                  />
+                </Col>
+              </Row>
+              {/* Action Buttons */}
+              <Row gutter={16} style={{ textAlign: 'center' }}>
+                <Col span={24}>
+                  <Button 
+                    type="primary" 
+                    size="large" 
+                    onClick={() => setIsUpdateModalVisible(true)}
+                    style={{ width: '100%' }}
+                  >
+                    Cập nhật thông tin
+                  </Button>
+                </Col>
+              </Row>
             </div>
-          )}
-
-          {backendError && (
-            <div
-              style={{
-                color: "red",
-                backgroundColor: "#ffecec",
-                padding: "10px",
-                borderRadius: "4px",
-                marginBottom: "16px",
-                textAlign: "center",
-              }}
-            >
-              {backendError}
-            </div>
-          )}
-          {/* Existing form fields remain the same */}
-          <Form.Item name="email" label="Email">
-            <Input placeholder="Email" disabled />
-          </Form.Item>
-
-          <Form.Item
-            name="name"
-            label="Full Name"
-            rules={[
-              { required: true, message: "Please enter your full name!" },
-            ]}
-          >
-            <Input placeholder="Enter your full name" allowClear />
-          </Form.Item>
-
-          <Form.Item
-            name="phoneNumber"
-            label="Phone Number"
-            rules={[
-              { required: true, message: "Please enter your phone number!" },
-            ]}
-          >
-            <Input placeholder="Enter your phone number" allowClear />
-          </Form.Item>
-
-          <Button
-            type="primary"
-            htmlType="submit"
-            style={{ width: "100%", marginBottom: 16 }}
-          >
-            Update Profile
-          </Button>
-        </Form>
-
-        {/* Add button to open password change modal */}
-        <Button
-          type="default"
-          style={{ width: "100%" }}
-          onClick={() => setIsPasswordModalVisible(true)}
-        >
-          Change Password
-        </Button>
-
-        {/* Render password change modal */}
-        {renderPasswordChangeModal()}
-      </Card>
+          </Card>
+        </Col>
+      </Row>
+      {renderUpdateModal()}
     </div>
   );
 };

@@ -8,15 +8,15 @@ import { LineChart, lineElementClasses, areaElementClasses } from '@mui/x-charts
 
 const AdminDashboard = () => {
   // Fake data cho admin
-  const totalUsers = 320;
-  const totalStores = 45;
-  const totalProducts = 780;
-  const totalServices = 210;
-  const totalBlogs = 67;
-  const totalPets = 1540;
-  const totalProductReviews = 4200;
+  const totalUsers = 50;
+  const totalStores = 20;
+  const totalProducts = 134;
+  const totalServices = 20;
+  const totalBlogs = 3;
+  const totalPets = 30;
+  const totalProductReviews = 420;
   const avgProductRating = 4.5;
-  const totalServiceReviews = 3100;
+  const totalServiceReviews = 200;
   const avgServiceRating = 4.3;
 
   // Dữ liệu cho chart demo
